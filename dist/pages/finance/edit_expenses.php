@@ -1,15 +1,15 @@
 <?php
 require __DIR__ . '/parts/init.php';
-$title = "捐款資料修改";
+$title = "平台支出編輯";
 $pageName = "edit";
 
 // 讀取該筆資料
 $bn_id = isset($_GET['bn_id']) ? intval($_GET['bn_id']) : 0;
-$sql = "SELECT * FROM bank_transfer_details WHERE id=$bn_id";
+$sql = "SELECT * FROM expenses WHERE id=$bn_id";
 $r = $pdo->query($sql)->fetch();
 if (empty($r)) {
   // 如果沒有對應的資料，就跳走
-  header('Location: bank.php');
+  header('Location: expenses.php');
   exit;
 }
 
@@ -20,40 +20,44 @@ if (empty($r)) {
 <div class="container">
   <div class="row mt-4">
     <div class="col-6">
-      <h2>審核轉帳資料</h2>
-      <form id="editForm" action="edit_bank-api.php" method="POST" novalidate>
-        <input type="hidden" name="bn_id" value="<?= $r['id'] ?>">
-
+      <h2>編輯支出資料</h2>
+      <form id="editForm" action="edit_expenses-api.php" method="POST" novalidate>
         <div class="mb-3">
-          <label for="donation_id" class="form-label">捐款編號</label>
-          <input type="text" class="form-control" id="donation_id" name="donation_id" value="<?= $r['donation_id'] ?>"
-            required readonly>
+          <label for="expenses_id" class="form-label">支出編號</label>          <input type="text" class="form-control" id="expenses_id" name="expenses_id" value="<?= $r['id'] ?>"
+            readonly>
         </div>
         <div class="mb-3">
-          <label for="donor_name" class="form-label">捐款人姓名</label>
-          <input type="text" class="form-control" id="donor_name" name="donor_name" value="<?= $r['donor_name'] ?>"
-            required>
-        </div>
-        <div class="mb-3">
-          <label for="transfer_amount" class="form-label">捐款金額</label>
-          <input type="number" class="form-control" id="transfer_amount" name="transfer_amount" value="<?= $r['transfer_amount'] ?>" required>
-        </div>
-        <div class="mb-3">
-          <label for="transfer_date" class="form-label">匯款日期</label>
-          <input type="date" class="form-control" id="transfer_date" name="transfer_date" value="<?= $r['transfer_date'] ?>" required>
-        </div>
-        <div class="mb-3" id="id_or_tax_id_number">
-          <label for="id_or_tax_id_number" class="form-label">帳號末五碼</label>
-          <input type="text" class="form-control" id="id_or_tax_id_number" name="id_or_tax_id_number"
-            value="<?= $r['id_or_tax_id_number'] ?>" required>
-        </div>
-        <div class="mb-3">
-          <label for="reconciliation_status" class="form-label">對帳狀態</label>
-          <select class="form-select" id="reconciliation_status" name="reconciliation_status" required>
-            <option value="已核對" <?= $r['reconciliation_status'] == '已完成' ? 'selected' : '' ?>>已核對</option>
-            <option value="未核對" <?= $r['reconciliation_status'] == '未完成' ? 'selected' : '' ?>>未核對</option>
-            <option value="不成立" <?= $r['reconciliation_status'] == '不成立' ? 'selected' : '' ?>>不成立</option>
+          <label for="expense_purpose" class="form-label">支出項目</label>
+          <select class="form-select" id="expense_purpose" name="expense_purpose" required>
+            <option value="食品採購" <?= $r['expense_purpose'] == '食品採購' ? 'selected' : '' ?>>食品採購</option>
+            <option value="醫療費用" <?= $r['expense_purpose'] == '醫療費用' ? 'selected' : '' ?>>醫療費用</option>
+            <option value="行政開支" <?= $r['expense_purpose'] == '行政開支' ? 'selected' : '' ?>>行政開支</option>
+            <option value="活動費用" <?= $r['expense_purpose'] == '活動費用' ? 'selected' : '' ?>>活動費用</option>
+            <option value="器材採購" <?= $r['expense_purpose'] == '器材採購' ? 'selected' : '' ?>>器材採購</option>
+            <option value="設備維護" <?= $r['expense_purpose'] == '設備維護' ? 'selected' : '' ?>>設備維護</option>
           </select>
+        </div>
+        <div class="mb-3">
+          <label for="amount" class="form-label">支出金額</label>
+          <input type="number" class="form-control" id="amount" name="amount" value="<?= $r['amount'] ?>" required>
+        </div>
+        <div class="mb-3">
+          <label for="expense_date" class="form-label">支出日期</label>
+          <input type="date" class="form-control" id="expense_date" name="expense_date" value="<?= $r['expense_date'] ?>" required>
+        </div>
+        <div class="mb-3" id="e_description">
+          <label for="e_description" class="form-label">支出描述</label>
+          <textarea class="form-control" id="e_description" name="e_description"
+            value="<?= $r['e_description'] ?>" required><?= $r['e_description'] ?></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="refund_id" class="form-label">退款編號</label>
+          <input type="text" class="form-control" id="refund_id" name="refund_id" value="<?= $r['refund_id'] ?>"
+            readonly>
+        </div>
+        <div class="mb-3">
+          <label for="created_by" class="form-label">記錄人員</label>
+          <input type="text" class="form-control" id="created_by" name="created_by" value="<?= $r['created_by'] ?>"readonly>
         </div>
         <button type="submit" class="btn btn-primary">更新資料</button>
       </form>
@@ -87,15 +91,8 @@ if (empty($r)) {
 
   const sendData = e => {
     e.preventDefault(); // 不要讓表單以傳統的方式送出
-
-    const donor_name = document.getElementById('donor_name');
     const form = document.getElementById('editForm');
-
-    // 清除先前的錯誤提示
-    donor_name.closest('.mb-3').classList.remove('error');
-
     let isPass = true; // 用來判斷表單是否通過驗證
-
     // 如果表單驗證通過，提交表單
     if (isPass) {
       const fd = new FormData(document.forms[0]);
@@ -105,7 +102,7 @@ if (empty($r)) {
         console.log(key + ": " + value);
       }
 
-      fetch(`edit_bank-api.php`, {
+      fetch(`edit_expenses-api.php`, {
           method: 'POST',
           body: fd
         })

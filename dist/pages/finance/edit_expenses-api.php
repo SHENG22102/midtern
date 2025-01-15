@@ -8,51 +8,47 @@ $output = [
     'code' => 0
 ];
 
-$bn_id = isset($_POST['bn_id']) ? intval($_POST['bn_id']) : 0;
-$donor_name = isset($_POST['donor_name']) ? trim($_POST['donor_name']) : '';
-$transfer_amount = isset($_POST['transfer_amount']) ? trim($_POST['transfer_amount']) : '';
-$transfer_date = isset($_POST['transfer_date']) ? trim($_POST['transfer_date']) : '';
-$id_or_tax_id_number = isset($_POST['id_or_tax_id_number']) ? trim($_POST['id_or_tax_id_number']) : '';
-$reconciliation_status = isset($_POST['reconciliation_status']) ? $_POST['reconciliation_status'] : '';
+$id = (int) $_POST['expenses_id'] ?? 0;
+$expense_purpose = $_POST['expense_purpose'] ?? '';
+$amount = $_POST['amount'] ?? '';
+$expense_date = $_POST['expense_date'] ?? '';
+$e_description = $_POST['e_description'] ?? '';
+$refund_id = $_POST['refund_id'] ?? '';
+$created_by = $_POST['created_by'] ?? '';
 
 // 資料檢查
-if (empty($donor_name) || empty($transfer_amount) || empty($transfer_date) || empty($id_or_tax_id_number) || empty($reconciliation_status)) {
+if (empty($id) || empty($expense_purpose) || empty($amount) || empty($expense_date) || empty($e_description) || empty($created_by)) {
     $output['code'] = 400;
     $output['error'] = '請填寫所有必要的欄位';
     echo json_encode($output, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-if (!is_numeric($transfer_amount) || $transfer_amount <= 0) {
-    $output['code'] = 400;
-    $output['error'] = '捐款金額必須為正數字';
-    echo json_encode($output, JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
 // 更新審核資料
-$sql_update_donation = "UPDATE bank_transfer_details SET 
-    donor_name = ?, 
-    transfer_amount = ?, 
-    transfer_date = ?, 
-    id_or_tax_id_number = ?, 
-    reconciliation_status = ?
+$sql_update_expenses = "UPDATE expenses SET 
+    expense_purpose = ?, 
+    amount = ?, 
+    expense_date = ?, 
+    e_description = ?,
+    refund_id = ?,
+    created_by = ?
     WHERE id = ?";
 
-$stmt_update_donation = $pdo->prepare($sql_update_donation);
-$stmt_update_donation->execute([
-    $donor_name,
-    $transfer_amount,
-    $transfer_date,
-    $id_or_tax_id_number,
-    $reconciliation_status,
-    $bn_id
+$stmt_update_expenses = $pdo->prepare($sql_update_expenses);
+$stmt_update_expenses->execute([
+    $expense_purpose,
+    $amount,
+    $expense_date,
+    $e_description,
+    $refund_id,
+    $created_by,
+    $id
 ]);
 
-$donation_updated = $stmt_update_donation->rowCount() > 0;
+$expenses_updated = $stmt_update_expenses->rowCount() > 0;
 
 // 總結果判斷
-if ($donation_updated) {
+if ($expenses_updated) {
     $output['success'] = true;
 } else {
     $output['error'] = '未做任何變更，請檢查資料';
