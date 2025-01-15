@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/parts/init.php';
-$title = "捐款明細";
-$pageName = "list";
+$title = "捐款管理";
+$pageName = "donations";
 
 $perPage = 25; # 每一頁有幾筆
 
