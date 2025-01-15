@@ -35,7 +35,7 @@ if (isset($_GET['product_id_check'])) {
 
 
 /******************************修改商品 api***************************** */ 
-if(!empty($_POST['variant_name']) || !empty($_POST['category']) || !empty($_POST['category_name']) ){
+if(!empty($_POST['variant_name']) || !empty($_POST['category']) || !empty($_POST['category_name']) || !empty($_POST['order_id']) || !empty($_POST['promotion_name'])){
 
 /************** 修改商品規格 ***********************/ 
 if(!empty($_POST['variant_name'])){
@@ -181,7 +181,7 @@ elseif(!empty($_POST['category'])){
 }
 
 
-/************** 修改商品 ********************************/ 
+/************** 修改商品類別********************************/ 
 elseif(!empty($_POST['category_name'])){
   $sql = "UPDATE `categories` SET 
   `category_name`=?,
@@ -218,7 +218,115 @@ elseif(!empty($_POST['category_name'])){
 
 }
 
+
+/************** 修改訂單資訊********************************/ 
+elseif(!empty($_POST['order_id'])){
+  $sql = "UPDATE `orders` SET 
+  `recipient_name`=?,
+  `recipient_phone`=?,
+  `recipient_email`=?,
+  `shipping_address`=?
+  WHERE `order_id`=? ";
+
+
+
+  # ********* TODO: 欄位檢查 *************
+  
+  if (!isset($_POST['recipient_name'])  ) {
+    $output['code'] = 401; # 自行決定的除錯編號
+    $output['error'] = '沒有填寫收件者名稱!';
+    echo json_encode($output, JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+  elseif (!isset($_POST['recipient_phone']) ) {
+    $output['code'] = 401; # 自行決定的除錯編號
+    $output['error'] = '沒有填寫收件者電話!';
+    echo json_encode($output, JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+  elseif (!isset($_POST['recipient_email']) ) {
+    $output['code'] = 401; # 自行決定的除錯編號
+    $output['error'] = '沒有填寫收件者信箱!';
+    echo json_encode($output, JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+  elseif (!isset($_POST['shipping_address']) ) {
+    $output['code'] = 401; # 自行決定的除錯編號
+    $output['error'] = '沒有填寫收件地址!';
+    echo json_encode($output, JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+  
+  # ********* TODO END *************
+          
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $_POST['recipient_name'],
+    $_POST['recipient_phone'],
+    $_POST['recipient_email'],
+    $_POST['shipping_address'],
+    $_POST['order_id'],
+  ]);
+
+}
+
+
+
+/************** 修改活動資訊********************************/ 
+elseif(!empty($_POST['promotion_name'])){
+  $sql = "UPDATE `promotions` SET 
+  `promotion_name`=?,
+  `promotion_description`=?,
+  `discount_percentage`=?,
+  `start_date`=?,
+  `end_date`=?
+  WHERE `promotion_id`=? ";
+
+
+
+  # ********* TODO: 欄位檢查 *************
+  
+  if (empty($_POST['start_date']) ) {
+    $output['code'] = 401; # 自行決定的除錯編號
+    $output['error'] = '沒有填寫開始日期!';
+    echo json_encode($output, JSON_UNESCAPED_UNICODE);
+    exit;
+  }else if(empty($_POST['end_date']) ){
+    $output['code'] = 401; # 自行決定的除錯編號
+    $output['error'] = '沒有填寫結束日期!';
+    echo json_encode($output, JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+  else if(empty($_POST['discount_percentage']) ){
+    $output['code'] = 401; # 自行決定的除錯編號
+    $output['error'] = '沒有填寫折扣!';
+    echo json_encode($output, JSON_UNESCAPED_UNICODE);
+    exit;
+  }else if($_POST['discount_percentage']<0 || $_POST['discount_percentage']>100){
+    $output['code'] = 401; # 自行決定的除錯編號
+    $output['error'] = '折扣 % 格式錯誤!';
+    echo json_encode($output, JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+
+  # ********* TODO END *************
+          
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    $_POST['promotion_name'],
+        $_POST['description'] ?? null,
+        $_POST['discount_percentage'],
+        $_POST['start_date'],
+        $_POST['end_date'],
+        $_POST['promotion_id'],
+  ]);
+
+}
+
+
 $output['success'] = !! $stmt->rowCount(); # 修改了幾筆, 轉布林值
+
+
 
 
 echo json_encode($output, JSON_UNESCAPED_UNICODE);

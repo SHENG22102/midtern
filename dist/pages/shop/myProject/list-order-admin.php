@@ -68,6 +68,7 @@ if ($totalRows > 0) {
     ON
     o.user_id=u.user_id
     %s 
+    ORDER BY created_at DESC
     LIMIT %d, %d
     "
     ,
@@ -128,10 +129,11 @@ if ($totalRows > 0) {
       <table class="table table-bordered ">
         <thead>
           <tr class="list-title">
+            <th><i class="fa-solid fa-list"></i></th>
             <th>訂單編號</th>
             <th>買家</th>
+            <th>狀態</th>
             <th>金額</th>
-            <th>訂單狀態</th>
             <th>支付方式</th>
             <!-- 發票 -->
             <th>發票</th>
@@ -140,28 +142,31 @@ if ($totalRows > 0) {
             <th>備註</th>
             <!-- 運送 -->
             <th>運送資訊</th>
-            <th>運送方式</th>
-            <th>地址/門市</th>
-            <th>追蹤號碼</th>
             <!-- 時間 -->
-            <th>發貨時間</th>
-            <th>訂單創建時間</th>
-            <th>訂單完成時間</th>
-            <th>訂單更新時間</th>
+            <!-- <th>發貨時間</th> -->
+            <th>創建時間</th>
+            <!-- <th>完成時間</th> -->
+            <th>更新時間</th>
             <th><i class="fa-solid fa-pen-to-square"></i></th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="order-accordion">
           <?php foreach ($rows as $r): ?>
             <tr class="list-order">
+              <td>
+                <a href="list-orderItem.php?order_id=<?= $r['order_id'] ?>">
+                <i class="fa-solid fa-list"></i>
+                </a>
+              </td>
               <td><?= $r['order_id'] ?></td>
               <td><?= htmlentities($r['user_name']) ?></td>
-              <td><?= $r['total_price'] ?></td>
               <td><?= htmlentities($r['order_status']) ?></td>
+              <td><?= $r['total_price'] ?></td>
               <td><?= htmlentities($r['payment_method']) ?></td>
               <td>
-                <?= htmlentities($r['invoice_method']) ?>
+                <?php if (!empty($r['invoice'] )):?>
                 <?= htmlentities($r['invoice']) ?>
+                <?php endif?>
               </td>
               <td>
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#recipient-<?= $r['order_id'] ?>" aria-expanded="false" aria-controls="recipient-<?= $r['order_id'] ?>">
@@ -170,39 +175,36 @@ if ($totalRows > 0) {
               </td>
               <td><?= htmlentities($r['remark']) ?></td>
               <td>
-                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#recipient-<?= $r['order_id'] ?>" aria-expanded="false" aria-controls="recipient-<?= $r['order_id'] ?>">
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#shipping-<?= $r['order_id'] ?>" aria-expanded="false" aria-controls="shipping-<?= $r['order_id'] ?>">
                   查看
                 </button>
               </td>
-              <td><?= htmlentities($r['shipping_method']) ?></td>
-              <td><?= htmlentities($r['shipping_address']) ?></td>
-              <td><?= htmlentities($r['tracking_number']) ?></td>
-              <td><?= htmlentities($r['shipped_at']) ?></td>
+              <!-- <td><?= htmlentities($r['shipped_at']) ?></td> -->
               <td><?= htmlentities($r['created_at']) ?></td>
-              <td><?= htmlentities($r['finish_at']) ?></td>
+              <!-- <td><?= htmlentities($r['finish_at']) ?></td> -->
               <td><?= htmlentities($r['updated_at']) ?></td>
               <td>
-                <a href="edit-product.php?product_id=<?= $r['order_id'] ?>">
+                <a href="./edit-order.php?order_id=<?= $r['order_id'] ?>">
                   <i class="fa-solid fa-pen-to-square"></i>
                 </a>
               </td>
             </tr>
             <!-- 隱藏詳細資訊行 -->
-            <tr class="collapse" id="recipient-<?= $r['order_id'] ?>" >
+            <tr class="collapse" id="recipient-<?= $r['order_id'] ?>" data-bs-parent="#order-accordion" >
                 <td colspan="20"  class="bg-secondary-subtle">
-                    <div class="p-3">
-                        <strong>收件人資訊：</strong>
-                        <ul>
-                            <li><strong>收件人姓名 : </strong> <?= htmlentities($r['recipient_name']) ?></li>
-                            <li><strong>收件人電話 : </strong> <?= htmlentities($r['recipient_phone']) ?></li>
-                            <li><strong>收件人信箱 : </strong> <?= htmlentities($r['recipient_email']) ?></li>
+                    <div class="p-3 ">
+                        <strong >收件人資訊：</strong>
+                        <ul class="mt-2">
+                            <li><strong>姓名 : </strong> <?= htmlentities($r['recipient_name']) ?></li>
+                            <li><strong>電話 : </strong> <?= htmlentities($r['recipient_phone']) ?></li>
+                            <li><strong>信箱 : </strong> <?= htmlentities($r['recipient_email']) ?></li>
                             <!-- 可以添加更多詳細資訊 -->
                         </ul>
                     </div>
                 </td>
             </tr>
             <!-- 隱藏詳細資訊行 -->
-            <tr class="collapse" id="recipient-<?= $r['order_id'] ?>" >
+            <tr class="collapse" id="shipping-<?= $r['order_id'] ?>" data-bs-parent="#order-accordion">
                 <td colspan="20"  class="bg-secondary-subtle">
                     <div class="p-3">
                         <strong>運送資訊：</strong>
@@ -215,37 +217,6 @@ if ($totalRows > 0) {
                     </div>
                 </td>
             </tr>
-            
-            <!-- 變體 -->
-            <!-- <?php foreach ($rows_v as $v):
-              if ($v['product_id'] === $r['product_id']): ?>
-                <tr class="list-variant">
-                  <td>
-                    <a href="javascript:" onclick="deleteVariant(event)">
-                      <i class="fa-solid fa-trash text-warning"></i>
-                    </a>
-                  </td>
-                  <td hidden><?= $r['product_name'] ?></td>
-                  <td hidden><?= $v['variant_id'] ?></td>
-                  <td></td>
-                  <td></td>
-                  <td><?= htmlentities($v['variant_name']) ?></td>
-                  <td></td>
-                  <td></td>
-                  <td><?= $v['variant_price'] ?></td>
-                  <td><?= $v['variant_stock'] ?></td></td>
-                  <td><?= htmlentities($v['variant_img']) ?></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td>
-                    <a href="edit-variant.php?variant_id=<?= $v['variant_id'] ?>">
-                      <i class="fa-solid fa-pen-to-square text-warning"></i>
-                    </a>
-                  </td>
-                </tr>
-              <?php endif; endforeach; ?> -->
-
           <?php endforeach; ?>
         </tbody>
       </table>
@@ -254,13 +225,13 @@ if ($totalRows > 0) {
 
     <!-- 頁碼 -->
   <div class="row mt-2">
-    <div class="col"></div>
-    <div class="col">
+    <!-- <div class="col "></div> -->
+    <div class="col ">
       <?php
       $qs = array_filter($_GET); # 去除值是空字串的項目
       ?>
       <nav aria-label="Page navigation example">
-        <ul class="pagination">
+        <ul class="pagination d-flex justify-content-center">
           <li class="page-item <?= $page == 1 ? 'disabled' : '' ?>">
             <a class="page-link" href="?<?php $qs['page'] = 1;
             echo http_build_query($qs) ?>">
@@ -301,6 +272,7 @@ if ($totalRows > 0) {
         </ul>
       </nav>
     </div>
+    <!-- <div class="col "></div> -->
   </div>
 
 </div>

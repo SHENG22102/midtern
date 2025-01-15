@@ -100,7 +100,7 @@ if (empty($r)) {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-        <a class="btn btn-primary" href="list.php">回到列表頁</a>
+        <a class="btn btn-primary" href="list-category-admin.php">回到列表頁</a>
       </div>
     </div>
   </div>
@@ -108,52 +108,75 @@ if (empty($r)) {
 <?php include __DIR__ . '/parts/html-scripts.php' ?>
 
 <script>
-  const variantNameField = document.querySelector('#variant_name');
-  const priceField = document.querySelector('#price');
-  const stockField = document.querySelector('#stock');
+  const NameField = document.querySelector('#category_name');
+  const descriptionField = document.querySelector('#description');
+  const tagField = document.querySelector('#category_tag');
   const myModal = new bootstrap.Modal('#exampleModal');
+
+  /**************** 檢查類別名稱是否重複 ************** */
+  NameField.addEventListener('input', function () {
+    
+    if (NameField.value) {
+        // 發送 AJAX 請求
+        fetch(`add-upload-api.php?category_name_check=${NameField.value}`)
+          .then(response => response.json())
+          .then(data => {
+            // 更新商品名稱欄位
+            console.log(data.count);
+            
+            if(data.count !== "0"){
+              NameField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 已有此類別名稱，名稱不可重複`;
+              NameField.closest('.mb-3').classList.add('error');
+            }else{
+              NameField.closest('.mb-3').classList.remove('error');
+            NameField.nextElementSibling.innerHTML = '';
+            }
+            
+          })
+          .catch(error => {
+            console.error('發生錯誤:', error);
+          });
+      } 
+    });
+  /****************************** */
+
+
 
   const sendData = e => {
     e.preventDefault(); // 不要讓表單以傳統的方式送出
 
-    variantNameField.closest('.mb-3').classList.remove('error');
-    priceField.closest('.mb-3').classList.remove('error');
-    stockField.closest('.mb-3').classList.remove('error');
+    NameField.closest('.mb-3').classList.remove('error');
+    tagField.closest('.mb-3').classList.remove('error');
 
     let isPass = true; // 有沒有通過檢查, 預設值是 true
     // TODO: 資料欄位的檢查
-
-    if (!variantNameField.value) {
+    // --------------------------------------------------------
+    
+    
+    if (!NameField.value) {
       isPass = false;
-      variantNameField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 請填寫規格`;
-      variantNameField.closest('.mb-3').classList.add('error');
+      NameField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 請填寫商品名稱`;
+      NameField.closest('.mb-3').classList.add('error');
     }
-    if (!priceField.value) {
+    if (!tagField.value) {
       isPass = false;
-      priceField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 請填寫此規格價位`;
-      priceField.closest('.mb-3').classList.add('error');
-    }else if(priceField.value<0){
+      tagField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 請填寫標籤名稱`;
+      tagField.closest('.mb-3').classList.add('error');
+    }else if(tagField.value.length>5){
       isPass = false;
-      priceField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 請填寫正確的價格`;
-      priceField.closest('.mb-3').classList.add('error');
+      tagField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 標籤名稱需小於五個字元`;
+      tagField.closest('.mb-3').classList.add('error');
     }
-    if (!stockField.value) {
-      isPass = false;
-      stockField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 請填寫此規格庫存量`;
-      stockField.closest('.mb-3').classList.add('error');
-    }else if(stockField.value<0){
-      isPass = false;
-      stockField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 請填寫正確的庫存量`;
-      stockField.closest('.mb-3').classList.add('error');
-    }
+    
+    // --------------------------------------------------------
 
     if (isPass) {
       const fd = new FormData(document.forms[0]);
 
       fetch(`add-upload-api.php`, {
-        method: 'POST',
-        body: fd
-      }).then(r => r.json())
+          method: 'POST',
+          body: fd
+        }).then(r => r.json())
         .then(obj => {
           console.log(obj);
           if (!obj.success && obj.error) {
@@ -169,38 +192,6 @@ if (empty($r)) {
 
   }
 
-
-  // ---------------- 做上傳處理 ---------------------------
-
-  const photo = document.upload_form.photo; // 取得上傳的欄位
-
-  photo.onchange = (e) => {
-    const fd = new FormData(document.upload_form);
-
-    // 檢查傳送的 FormData 是否正確
-    console.log("FormData entries:");
-    for (let [key, value] of fd.entries()) {
-      console.log(key, value);
-    }
-
-
-    fetch("./upload-photos.php", {
-      method: "POST",
-      body: fd,
-    })
-      .then((r) => r.json())
-      .then((obj) => {
-        console.log(obj);
-        if (obj.success && obj.file > 0) {
-          const myImg = document.querySelector("img.photo");
-          document.forms[0].photo.value = obj.files[0];
-          myImg.src = `./uploads/${obj.file[0]}`;
-        } else {
-          alert("圖片上傳失敗，請再試一次！");
-        }
-      })
-      .catch(console.warn);
-  };
 
 </script>
 <?php include __DIR__ . '/parts/html-tail.php' ?>

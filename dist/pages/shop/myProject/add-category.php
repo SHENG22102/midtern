@@ -76,7 +76,7 @@ $pageName = "add-category";
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-        <a class="btn btn-primary" href="list.php">回到列表頁</a>
+        <a class="btn btn-primary" href="list-category-admin.php">回到列表頁</a>
       </div>
     </div>
   </div>
@@ -100,7 +100,7 @@ $pageName = "add-category";
             // 更新商品名稱欄位
             console.log(data.count);
             
-            if(data.count !== 0){
+            if(data.count !== "0"){
               NameField.nextElementSibling.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 已有此類別名稱，名稱不可重複`;
               NameField.closest('.mb-3').classList.add('error');
             }else{
@@ -169,60 +169,5 @@ $pageName = "add-category";
   }
 
 
-  // ---------------- 做上傳處理 ---------------------------
-  
-  const photo = document.upload_form.photo; // 取得上傳的欄位
-
-  photo.onchange = (e) => {
-    const fd = new FormData(document.upload_form);
-
-    // 檢查傳送的 FormData 是否正確
-    console.log("FormData entries:");
-    for (let [key, value] of fd.entries()) {
-        console.log(key, value);
-    }
-
-
-    fetch("./upload-photos.php", {
-        method: "POST",
-        body: fd,
-      })
-      .then((r) => r.json())
-      .then((obj) => {
-        console.log(obj);
-            if (obj.success && obj.file > 0) {
-                const myImg = document.querySelector("img.photo");
-                document.forms[0].photo.value = obj.files[0];
-                myImg.src = `./uploads/${obj.file[0]}`;
-            } else {
-                alert("圖片上傳失敗，請再試一次！");
-            }
-      })
-      .catch(console.warn);
-  };
-  
-  // -----------------------------
-  fetch('add-upload-api.php', {
-    method: 'POST',
-    body: new FormData(document.forms[0]),
-})
-.then(response => response.text())  // 使用 text() 先檢查回應
-.then(text => {
-    if (text) {
-        try {
-            const data = JSON.parse(text);  // 解析 JSON
-            console.log(data);
-        } catch (error) {
-            console.error('Failed to parse JSON:', error);
-            console.log('Response text:', text);  // 輸出伺服器返回的原始內容
-        }
-    } else {
-        console.error('Empty response from server');
-    }
-})
-.catch(error => {
-    console.error('Request failed', error);
-});
-// --------------------------------------
 </script>
 <?php include __DIR__ . '/parts/html-tail.php' ?>

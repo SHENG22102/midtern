@@ -4,14 +4,20 @@
 
 -- drop database Shopping_store;
 -- 待檢查，先不執行/建立
-create database Shopping_store;
-use shopping_store;
+-- create database Shopping_store;
+-- use shopping_store;
 
--- Users
-CREATE TABLE Users (
-	user_id INT primary key,
-    favoirites text
-);
+
+
+-- Users (我這邊先自己建的user，連user_id 1~10)
+-- CREATE TABLE Users (
+-- 	   user_id INT primary key,
+--     user_name varchar(255) not null,
+--     favoirites text
+-- );
+# 連向 user_id的表:
+# orders
+# Product_Reviews
 
 -- 1. Categories (商品分類) **
 CREATE TABLE Categories (
@@ -31,14 +37,14 @@ CREATE TABLE Products (
     product_id INT AUTO_INCREMENT PRIMARY KEY,
     product_name VARCHAR(255) NOT NULL,
     product_description TEXT,
-    price INT NOT NULL  NOT NULL,
+    price INT NOT NULL,
     category_id INT NOT NULL,
     created_at DATETIME DEFAULT NOW() NOT NULL,
     updated_at DATETIME DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP  NOT NULL,
-    product_status VARCHAR(20) DEFAULT '上架' NOT NULL,
+    product_status VARCHAR(20) DEFAULT '上架',
     image_url VARCHAR(255),
     stock_quantity INT DEFAULT 0  NOT NULL, #庫存
-    is_deleted BOOLEAN DEFAULT FALSE, -- 後臺可刪除，但是保留數據(需被訂單商品指向)
+    is_deleted BOOLEAN DEFAULT FALSE NOT NULL, -- 後臺可刪除，但是保留數據(需被訂單商品指向)
     FOREIGN KEY (category_id) REFERENCES Categories(category_id)
 );
 
@@ -85,7 +91,9 @@ CREATE TABLE Orders (
     payment_status VARCHAR(20) NOT NULL,
     -- 發票 
     invoice_method VARCHAR(20) NOT NULL, 
-    invoice VARCHAR(50),
+    invoice VARCHAR(50) NOT NULL,
+    mobile_barcode  VARCHAR(50) , -- 手機載具
+	taxID_number  VARCHAR(50) , -- 公司統編
     -- 收件人資料
     recipient_name VARCHAR(50) NOT NULL, 
     recipient_phone INT NOT NULL,
@@ -121,7 +129,6 @@ CREATE TABLE Order_Items (
     return_status VARCHAR(20) , -- 退貨狀態
     returned_quantity INT DEFAULT 0,
     FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE,
-    
     FOREIGN KEY (product_id) REFERENCES Products(product_id) ,
     FOREIGN KEY (variant_id) REFERENCES Product_Variants(variant_id) 
 );
@@ -196,7 +203,8 @@ CREATE TABLE Promotions (
     promotion_description TEXT,
     start_date DATE NOT NULL,
     end_date DATE,
-    discount_percentage INT NOT NULL
+    discount_percentage INT NOT NULL,
+    updated_at  DATETIME DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP NOT NULL
 );
 
 -- 13. Promotion_Products（促銷商品表） **
@@ -254,8 +262,14 @@ desc Promotion_Products;
 -- select * from Promotion_Products;
 
 -- ------------------資料變更-----------------------
+# 有更新時上面table我也會一起改(drop後可以重新create上面table)
+
 -- 0212先將變體狀態改成可為null
 -- ALTER TABLE Product_Variants MODIFY COLUMN variant_status VARCHAR(20) NULL;
+
+-- 2025/01/05--新增promotions欄位
+ALTER TABLE promotions
+ADD COLUMN updated_at  DATETIME DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP NOT NULL;
 
 
 

@@ -57,10 +57,118 @@ if ($totalRows > 0) {
   $rows = $pdo->query($sql)->fetchAll();
 }
 
+$pageRange = 2;
+$startPage = max($page - $pageRange, 1);
+$endPage = min($page + $pageRange, $totalPages);
+
+// 確保始終顯示第一頁和最後一頁
+if ($startPage > 1) {
+    $startPage = max($startPage, 2);
+}
+if ($endPage < $totalPages) {
+    $endPage = min($endPage, $totalPages - 1);
+}
 
 
 ?>
 <?php include ROOT_PATH . 'dist/pages/parts/head.php' ?>
+
+<style>
+.custom-pagination-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.custom-pagination .pagination {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background-color: #f8f9fa;
+    padding: 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.custom-pagination .page-item {
+    margin: 2px;
+}
+
+.custom-pagination .page-link {
+    border: none;
+    color: #495057;
+    border-radius: 3px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    min-width: 38px;
+    text-align: center;
+}
+
+.custom-pagination .page-item.active .page-link,
+.custom-pagination .page-link:hover:not(.disabled) {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.custom-pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #e9ecef;
+}
+
+.pagination-info {
+    margin-top: 1rem;
+    color: #6c757d;
+}
+
+/* 三角形圖示樣式 */
+.triangle-left,
+.triangle-right {
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    position: relative;
+    top: 0px; /* 微調三角形位置 */
+}
+
+.triangle-left {
+    border-right: 10px solid #495057;
+}
+
+.triangle-right {
+    border-left: 10px solid #495057;
+}
+
+.page-item:not(.disabled):hover .triangle-left {
+    border-right-color: #fff;
+}
+
+.page-item:not(.disabled):hover .triangle-right {
+    border-left-color: #fff;
+}
+
+.page-item.disabled .triangle-left {
+    border-right-color: #6c757d;
+}
+
+.page-item.disabled .triangle-right {
+    border-left-color: #6c757d;
+}
+
+.prev-page,
+.next-page {
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* 確保高度與其他按鈕一致 */
+}
+</style>
 <!--begin::Body-->
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
@@ -90,61 +198,49 @@ if ($totalRows > 0) {
   </form>
 </div>
   </div>
+
   <div class="row mt-2">
     <div class="col">
-      <?php
-      $qs = array_filter($_GET); # 去除值是空字串的項目
-      ?>
-      <nav aria-label="Page navigation example">
-        <!-- 讓 pagination 和按鈕都放入 flex 容器內 -->
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <ul class="pagination mb-0">
-            <li class="page-item <?= $page == 1 ? 'disabled' : '' ?>">
-              <a class="page-link" href="?<?php $qs['page'] = 1;
-                                          echo http_build_query($qs) ?>">
-                <i class="fa-solid fa-angles-left"></i>
-              </a>
-            </li>
-            <li class="page-item <?= $page == 1 ? 'disabled' : '' ?>">
-              <a class="page-link" href="?<?php $qs['page'] = $page - 1;
-                                          echo http_build_query($qs) ?>">
-                <i class="fa-solid fa-angle-left"></i>
-              </a>
-            </li>
+            <div class="flex-grow-1 text-center">
+                <nav aria-label="Page navigation" class="custom-pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        <!-- 分頁按鈕 -->
+                        <li class="page-item <?= $page == 1 ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?<?php $qs['page'] = 1; echo http_build_query($qs); ?>" aria-label="First">
+                                第一頁
+                            </a>
+                        </li>
+                        <li class="page-item <?= $page == 1 ? 'disabled' : '' ?>">
+                            <a class="page-link prev-page" href="?<?php $qs['page'] = max(1, $page - 1); echo http_build_query($qs); ?>" aria-label="Previous">
+                                <span class="triangle-left"></span>
+                            </a>
+                        </li>
 
-            <?php for ($i = $page - 5; $i <= $page + 5; $i++):
-              if ($i >= 1 and $i <= $totalPages):
-                $qs['page'] = $i;
-            ?>
-                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                  <a class="page-link" href="?<?= http_build_query($qs) ?>"><?= $i ?></a>
-                </li>
-            <?php endif;
-            endfor; ?>
+                        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                            <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                                <a class="page-link" href="?<?php $qs['page'] = $i; echo http_build_query($qs); ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
 
-            <li class="page-item <?= $page == $totalPages ? 'disabled' : '' ?>">
-              <a class="page-link" href="?<?php $qs['page'] = $page + 1;
-                                          echo http_build_query($qs) ?>">
-                <i class="fa-solid fa-angle-right"></i>
-              </a>
-            </li>
-            <li class="page-item <?= $page == $totalPages ? 'disabled' : '' ?>">
-              <a class="page-link" href="?<?php $qs['page'] = $totalPages;
-                                          echo http_build_query($qs) ?>">
-                <i class="fa-solid fa-angles-right"></i>
-              </a>
-            </li>
-          </ul>
-          <!-- 讓按鈕保持在同一行並對齊右側 -->
-          <div>
-          <div>
-          <a href="/midtern/dist/pages/forums/report.php" class="btn btn-primary">貼文檢舉</a>
-          <a href="/midtern/dist/pages/forums/report_comment.php" class="btn btn-primary">留言檢舉</a>
-</div>
-
-          </div>
+                        <li class="page-item <?= $page == $totalPages ? 'disabled' : '' ?>">
+                            <a class="page-link next-page" href="?<?php $qs['page'] = min($totalPages, $page + 1); echo http_build_query($qs); ?>" aria-label="Next">
+                                <span class="triangle-right"></span>
+                            </a>
+                        </li>
+                        <li class="page-item <?= $page == $totalPages ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?<?php $qs['page'] = $totalPages; echo http_build_query($qs); ?>" aria-label="Last">
+                                最後一頁
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="d-flex">
+                <a href="/midtern/dist/pages/forums/report.php" class="btn btn-primary me-2">貼文檢舉</a>
+                <a href="/midtern/dist/pages/forums/report_comment.php" class="btn btn-primary">留言檢舉</a>
+            </div>
         </div>
-      </nav>
     </div>
 </div>
 

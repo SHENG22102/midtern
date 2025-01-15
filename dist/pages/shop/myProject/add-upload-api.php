@@ -40,11 +40,69 @@ if (isset($_GET['category_name_check'])) {
 
 /*********************** 新增上傳 ***************************** */
 
-if(isset($_POST['variant_name']) || isset($_POST['variant_name']) || isset($_POST['category'])){
+if(isset($_POST['category_name']) || isset($_POST['variant_name']) || isset($_POST['category']) || isset($_POST['promotion_name']) ){
 
   /************** 新增產品類別 *****************/ 
   
-  if(!empty($_POST['category_name'])){
+  if(!empty($_POST['promotion_name']) ){
+    $sql = "INSERT INTO `promotions` ( 
+      `promotion_name`, 
+      `promotion_description`, 
+      `discount_percentage`, 
+      `start_date`,
+      `end_date`
+      ) 
+      VALUES ( ?, ?, ?, ?, ?)";
+    
+      # ********* TODO: 欄位檢查 *************
+
+
+      if (empty($_POST['start_date']) ) {
+        $output['code'] = 401; # 自行決定的除錯編號
+        $output['error'] = '沒有填寫開始日期!';
+        echo json_encode($output, JSON_UNESCAPED_UNICODE);
+        exit;
+      }else if(empty($_POST['end_date']) ){
+        $output['code'] = 401; # 自行決定的除錯編號
+        $output['error'] = '沒有填寫結束日期!';
+        echo json_encode($output, JSON_UNESCAPED_UNICODE);
+        exit;
+      }
+      else if(empty($_POST['discount_percentage']) ){
+        $output['code'] = 401; # 自行決定的除錯編號
+        $output['error'] = '沒有填寫折扣!';
+        echo json_encode($output, JSON_UNESCAPED_UNICODE);
+        exit;
+      }else if($_POST['discount_percentage']<0 || $_POST['discount_percentage']>100){
+        $output['code'] = 401; # 自行決定的除錯編號
+        $output['error'] = '折扣 % 格式錯誤!';
+        echo json_encode($output, JSON_UNESCAPED_UNICODE);
+        exit;
+      }
+      
+      
+      
+      # *************** TODO END ****************
+      $stmt = $pdo->prepare($sql);
+      try {
+        $stmt->execute([
+            $_POST['promotion_name'],
+            $_POST['description'] ?? null,
+            $_POST['discount_percentage'],
+            $_POST['start_date'],
+            $_POST['end_date']
+        ]);
+    } catch (PDOException $e) {
+        $output['error'] = '資料庫錯誤:' . $e->getMessage();
+        echo json_encode($output, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+  }
+  
+  
+  /************** 新增產品類別 *****************/ 
+  
+  if(!empty($_POST['category_name']) && empty($_POST['parent_id'])){
     $sql = "INSERT INTO `categories` ( 
       `category_name`, 
       `category_tag`, 
@@ -80,9 +138,46 @@ if(isset($_POST['variant_name']) || isset($_POST['variant_name']) || isset($_POS
   }
   
   
+  /************** 新增子類別 *****************/ 
+  
+  else if(!empty($_POST['category_name']) && !empty($_POST['parent_id'])){
+    $sql = "INSERT INTO `categories` ( 
+      `category_name`, 
+      `category_tag`, 
+      `category_description`,
+      `parent_id`
+      ) 
+      VALUES ( ?, ?, ?, ?)";
+    
+      # ********* TODO: 欄位檢查 *************
+
+
+      if (empty($_POST['category_tag']) ) {
+        $output['code'] = 401; # 自行決定的除錯編號
+        $output['error'] = '沒有填寫標籤!';
+        echo json_encode($output, JSON_UNESCAPED_UNICODE);
+        exit;
+      }
+      # *************** TODO END ****************
+      $stmt = $pdo->prepare($sql);
+      try {
+        $stmt->execute([
+            $_POST['category_name'],
+            $_POST['category_tag'],
+            $_POST['description'] ?? null,
+            $_POST['parent_id']
+        ]);
+    } catch (PDOException $e) {
+        $output['error'] = '資料庫錯誤:' . $e->getMessage();
+        echo json_encode($output, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+  }
+  
+  
   /************** 新增產品規格 *****************/ 
   
-  if(!empty($_POST['variant_name'])){
+  else if(!empty($_POST['variant_name'])){
     $sql = "INSERT INTO `product_variants` ( 
       `product_id`, 
       `variant_name`, 
@@ -144,7 +239,7 @@ if(isset($_POST['variant_name']) || isset($_POST['variant_name']) || isset($_POS
   
   
   /************** 新增產品 **********************************************/ 
-  elseif(!empty($_POST['category'])){
+  else if(!empty($_POST['category'])){
     $sql = "INSERT INTO `Products` ( 
     `product_name`, 
     `product_description`, 

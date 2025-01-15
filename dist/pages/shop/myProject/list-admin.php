@@ -237,13 +237,13 @@ if ($totalRows > 0) {
                   <td></td>
                   <td></td>
                   <td><?= $v['variant_price'] ?></td>
-                  <td><?= $v['variant_stock'] ?></td></td>
-                  <td><?= htmlentities($v['variant_img']) ?></td>
-                  <!-- <td>
-                  <?php if (!empty($v['image_url'])): ?>
-                    <img src="<?= $r['image_url'] ?>" alt="" width="100px">
+                  <td><?= $v['variant_stock'] ?></td>
+                  <td></td>
+                  <?php if (!empty($v['variant_img'])): ?>
+                    <td>
+                      <img src="<?= $v['variant_img'] ?>" alt="" width="100px">
+                    </td>
                   <?php endif; ?>
-                </td> -->
                   <td></td>
                   <td></td>
                   <td></td>

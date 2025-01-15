@@ -1,12 +1,12 @@
 <?php
 // 資料庫連接設定
-$host = "localhost";
-$db_user = "mfee59";
-$db_pass = "12345";
-$db_name = "membercenter";
+$host = "127.0.0.1";
+$db_username = "root";
+$db_password = "P@ssw0rd";
+$database = "membercenter";
 
 // 建立資料庫連接
-$link = mysqli_connect($host, $db_user, $db_pass, $db_name);
+$link = mysqli_connect($host, $db_username, $db_password, $database);
 if (!$link) {
     die("無法連接資料庫: " . mysqli_connect_error());
 }
@@ -23,36 +23,69 @@ $result = mysqli_query($link, $sql);
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理者名單</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
         table {
-            width: 80%;
-            margin: auto;
+            width: 90%;
+            margin: 0 auto;
             border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 12px;
             text-align: center;
         }
         th {
-            background-color: #f4f4f4;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
         }
         .button {
-            padding: 5px 10px;
+            padding: 8px 15px;
             color: white;
             background-color: #4CAF50;
             text-decoration: none;
             border-radius: 5px;
+            font-size: 14px;
+        }
+        .button:hover {
+            background-color: #45a049;
         }
         .button-delete {
             background-color: #f44336;
+        }
+        .button-delete:hover {
+            background-color: #e53935;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-<h1 align="center">管理者名單</h1>
+<h1>管理者名單</h1>
 
 <table>
     <thead>
@@ -76,7 +109,9 @@ $result = mysqli_query($link, $sql);
     </tbody>
 </table>
 
-<p align="center"><a class="button" href="add_manager.php">新增管理者</a></p>
+<div class="button-container">
+    <a class="button" href="add_manager.php">新增管理者</a>
+</div>
 
 </body>
 </html>

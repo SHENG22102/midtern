@@ -3,7 +3,7 @@ require __DIR__ . '/parts/init.php';
 $title = "商品列表";
 $pageName = "list_promotion";
 
-$perPage = 5; # 每一頁有幾筆
+$perPage = 50; # 每一頁有幾筆
 
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 if ($page < 1) {
@@ -21,7 +21,7 @@ $where = ' WHERE 1 '; # SQL 條件的開頭
 
 if ($keyword) {
   $keyword_ = $pdo->quote("%{$keyword}%"); # 字串內容做 SQL 引號的跳脫, 同時前後標單引號
-  $where .= " AND ( product_name LIKE $keyword_ OR category_tag LIKE $keyword_ OR product_id LIKE $keyword_  OR product_description LIKE $keyword_ ) ";
+  $where .= " AND ( promotion_name LIKE $keyword_ ) ";
 }
 
 
@@ -40,18 +40,19 @@ if ($keyword) {
 
 $t_sql = "SELECT COUNT(1) 
           FROM  
-            Products p
-          JOIN 
-            Categories c
+              promotions 
+          LEFT JOIN 
+              promotion_products
           ON 
-            c.category_id = p.category_id 
+              promotions.promotion_id = promotion_products.promotion_id 
+            
           $where";
 
 # 總筆數
 $totalRows = $pdo->query($t_sql)->fetch(PDO::FETCH_NUM)[0];
 # 總頁數
 $totalPages = ceil($totalRows / $perPage);
-$rows = []; # 設定預設值
+$promotionows = []; # 設定預設值
 if ($totalRows > 0) {
   if ($page > $totalPages) {
     # 用戶要看的頁碼超出範圍, 跳到最後一頁
@@ -60,66 +61,102 @@ if ($totalRows > 0) {
   }
 
   // 排序
-  $orderBy = 'p.product_id DESC';
+  $orderBy = 'promotion_id  DESC';
   
   // 定義允許的排序欄位
   $allowedOrderBy = [
-    'p.product_id DESC',
-    'p.product_id',
-    'p.product_name',
-    'c.category_tag',
-    'p.price DESC',
-    'p.price',
-    'p.updated_at DESC'
+    'promotion_id  DESC',
+    'promotion_id',
+    'start_date DESC',
+    'start_date',
+    'end_date DESC',
+    'end_date'
   ];
   // 驗證 orderBy 是否為允許的選項
   if (!empty($_GET['orderBy']) && in_array($_GET['orderBy'], $allowedOrderBy)) {
   $orderBy = $_GET['orderBy'];
   }
 
+
+
+ 
+
+
   # 取第一頁的資料
-  # 取第一頁的資料
-  // products
-  $sql = sprintf("SELECT 
-    c.category_id,
-    c.category_tag,
-    p.product_id,
-    p.product_name,
-    p.price AS product_price,
-    p.stock_quantity AS product_stock,
-    p.product_description,
-    p.product_status,
-    p.image_url,
-    p.created_at,
-    p.updated_at
+//   $sql = sprintf("SELECT 
+//     *
+//     FROM 
+//         promotions
+//     %s
+//     ORDER BY 
+//         $orderBy
+//     LIMIT %d, %d",
+//     $where,
+//     ($page - 1) * $perPage,
+//     $perPage
+// );
+// $promotionows = $pdo->query($sql)->fetchAll(); # 取得該分頁的資料
+
+
+//   $sql_p = sprintf("SELECT 
+//     COUNT(*)
+//     FROM 
+//         promotion_products AS product
+//     ");
+    
+//   $promotionows_p = $pdo->query($sql_p)->fetchAll(); # 取得該分頁的資料
+
+
+/***************************************** */
+$sql = sprintf("SELECT 
+    promotions.*, 
+    promotion_products.product_id, 
+    promotion_products.variant_id, 
+    promotion_products.category_id
     FROM 
-        Products p
-    JOIN 
-        Categories c
+        promotions
+    LEFT JOIN 
+        promotion_products
     ON 
-        c.category_id = p.category_id
+        promotions.promotion_id = promotion_products.promotion_id
     %s
-    ORDER BY $orderBy  LIMIT %d, %d
-    "
-    ,
+    ORDER BY 
+        $orderBy
+    LIMIT %d, %d",
     $where,
     ($page - 1) * $perPage,
     $perPage
-  );
-  $rows = $pdo->query($sql)->fetchAll(); # 取得該分頁的資料
+);
+$rows = $pdo->query($sql)->fetchAll(); # 取得該分頁的資料
 
-  // 變體
-  $sql_v = "SELECT 
-    product_id,
-    variant_id,
-    variant_name,
-    price AS variant_price,
-    stock_quantity AS variant_stock,
-    image_url AS variant_img
-    FROM 
-        Product_Variants
-    ORDER BY product_id ";
-  $rows_v = $pdo->query($sql_v)->fetchAll(); # 取得該分頁的資料
+
+$lastPromotionId = null;  // 用來存儲上次顯示的促銷活動 ID
+$promotionData = [];      // 用來儲存促銷活動與搭配商品的資料
+
+// 首先整理促銷活動資料
+foreach ($rows as $r) {
+    if ($r['promotion_id'] != $lastPromotionId) {
+        $lastPromotionId = $r['promotion_id'];
+        // 收集該促銷活動的資料
+        $promotionData[$r['promotion_id']] = [
+            'promotion_name' => $r['promotion_name'],
+            'promotion_description' => $r['promotion_description'],
+            'promotion_id' => $r['promotion_id'], // 儲存 promotion_id
+            'start_date' => $r['start_date'],
+            'end_date' => $r['end_date'],
+            'updated_at' => $r['updated_at'],
+            'has_products' => false, // 標記是否有搭配商品、變體或類別
+        ];
+    }
+
+    // 檢查是否有搭配商品、變體或類別，並標記
+    if ($r['product_id'] || $r['variant_id'] || $r['category_id']) {
+        $promotionData[$r['promotion_id']]['has_products'] = true;
+    }
+}
+
+/***************************************** */
+
 }
 
 
@@ -127,24 +164,22 @@ if ($totalRows > 0) {
 <?php include __DIR__ . '/parts/html-head.php' ?>
 <?php include __DIR__ . '/parts/html-navbar.php' ?>
 
-
 <div class="container">
   <div class="row mt-2 mb-2">
-    <!-- 排序選單 -->
+    <!-- 排序選單 *有空再用-->
     
     <div class="col-6 d-flex">
-      <a href="./add-product.php" class="btn btn-outline-secondary me-3" >新增商品</a>
+      <a href="./add-promotion.php" class="btn btn-outline-secondary me-3" >新增活動</a>
       <form action=""  method="GET">
         <select name="orderBy" id="orderBy" onchange="this.form.submit()" class="form-select">
-          <option value="p.product_id DESC" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='p.product_id DESC'  ? 'selected':'';?>>最新 (排序)</option>
-          <option value="p.product_id" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='p.product_id'   ? 'selected':''?>>最舊</option>
-          <option value="p.product_name" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='p.product_name'   ? 'selected':''?>>名稱</option>
-          <option value="c.category_tag" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='c.category_tag'  ? 'selected':''?>>類別
-          </option>
-          <option value="p.price DESC" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='p.price DESC'   ? 'selected':''?>>價格(高->低)</option>
-          <option value="p.price" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='p.price'  ? 'selected':''?>>價格(低->高)</option>
-          <option value="p.updated_at DESC" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='p.updated_at  DESC'  ? 'selected':''?>>最近更新</option>
-          
+          <option value="promotion_id DESC" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='promotion_id  DESC'  ? 'selected':'';?>>最新 (排序)</option>
+          <option value="promotion_id" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='promotion_id '   ? 'selected':''?>>最舊</option>
+          <option value="start_date DESC" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='start_date DESC'   ? 'selected':''?>>活動開始時間</option>
+
+          <option value="end_date DESC" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='end_date DESC'   ? 'selected':''?>>活動結束時間</option>
+
+          <option value="updated_at" <?php echo isset($_GET['orderBy']) &&  $_GET['orderBy']=='updated_at DESC'   ? 'selected':''?>>最近更新</option>
+
         </select>
       </form>
     </div>
@@ -154,7 +189,7 @@ if ($totalRows > 0) {
       <form class="d-flex" role="search">
         <input class="form-control me-2" name="keyword"
           value="<?= empty($_GET['keyword']) ? '' : htmlentities($_GET['keyword']) ?>" type="search"
-          placeholder="編號/名稱/類別/介紹" aria-label="Search">
+          placeholder="活動名稱" aria-label="Search">
         <button class="btn btn-outline-success" type="submit">Search</button>
       </form>
     </div>
@@ -167,95 +202,59 @@ if ($totalRows > 0) {
         <thead>
           <tr class="list-title">
             <th><i class="fa-solid fa-trash"></i></th>
-            <th>編號</th>
-            <th>商品</th>
-            <th>規格</th>
-            <th>類別</th>
-            <th>介紹</th>
-            <th>價格</th>
-            <th>庫存</th>
-            <th>狀態</th>
-            <th>照片</th>
-            <!-- <th>照片</th> -->
-            <th>創建時間</th>
+            <th>活動編號</th>
+            <th>活動名稱</th>
+            <th>描述</th>
+            <th>搭配商品</th>
+            <!-- <th>狀態</th> -->
+            <th>開始日期</th>
+            <th>結束日期</th>
             <th>更新時間</th>
             <th><i class="fa-solid fa-pen-to-square"></i></th>
           </tr>
         </thead>
         <tbody>
-          <?php foreach ($rows as $r): ?>
-            <tr class="list-product">
-              <td>
-                <a href="javascript:" onclick="deleteOne(event)">
-                  <i class="fa-solid fa-trash"></i>
-                </a>
-              </td>
-              <td><?= $r['product_id'] ?></td>
-              <td><?= htmlentities($r['product_name']) ?></td>
-              <td><a href="add-variant.php?product_id=<?= $r['product_id'] ?>"><i class="fa-solid fa-square-plus"></i></a></td>
-              <td><?= $r['category_tag'] ?></td>
-              <td><?= htmlentities($r['product_description']) ?></td>
-              <td><?= $r['product_price'] ?></td>
-              <td>
-                <?php if (array_filter($rows_v, fn($v) => $v['product_id'] === $r['product_id'])): ?>
-                  --
-                <?php else:
-                  echo $r['product_stock'] ?>
-                <?php endif ?>
-              </td>
-              <td><?= htmlentities($r['product_status']) ?></td>
-              <!-- <td><?= htmlentities($r['image_url']) ?></td> -->
-              <td>
-                <?php if (!empty($r['image_url'])): ?>
-                  <img src="<?= $r['image_url'] ?>" alt="" width="100px">
-                <?php endif; ?>
-              </td>
-              
-              <td><?= $r['created_at'] ?></td>
-              <td><?= $r['updated_at'] ?></td>
-              <td>
-                <a href="edit-product.php?product_id=<?= $r['product_id'] ?>">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </a>
-              </td>
-            </tr>
-            
-            <!-- 變體 -->
-            <?php foreach ($rows_v as $v):
-              if ($v['product_id'] === $r['product_id']): ?>
-                <tr class="list-variant">
-                  <td>
-                    <a href="javascript:" onclick="deleteVariant(event)">
-                      <i class="fa-solid fa-trash text-warning"></i>
-                    </a>
-                  </td>
-                  <td hidden><?= $r['product_name'] ?></td>
-                  <td hidden><?= $v['variant_id'] ?></td>
-                  <td></td>
-                  <td></td>
-                  <td><?= htmlentities($v['variant_name']) ?></td>
-                  <td></td>
-                  <td></td>
-                  <td><?= $v['variant_price'] ?></td>
-                  <td><?= $v['variant_stock'] ?></td></td>
-                  <td><?= htmlentities($v['variant_img']) ?></td>
-                  <!-- <td>
-                  <?php if (!empty($v['image_url'])): ?>
-                    <img src="<?= $r['image_url'] ?>" alt="" width="100px">
-                  <?php endif; ?>
-                </td> -->
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td>
-                    <a href="edit-variant.php?variant_id=<?= $v['variant_id'] ?>">
-                      <i class="fa-solid fa-pen-to-square text-warning"></i>
-                    </a>
-                  </td>
-                </tr>
-              <?php endif; endforeach; ?>
 
-          <?php endforeach; ?>
+<?php foreach ($promotionData as $promotion):?>
+  <tr class="list-promotion">
+        <td>
+          <a href="javascript:" onclick="deleteOne(event)">
+            <i class="fa-solid fa-trash"></i>
+          </a>
+        </td>
+        <td><?= $promotion['promotion_id'] ?></td> 
+        <td><?= $promotion['promotion_name'] ?></td>
+        <td><?= $promotion['promotion_description'] ?></td>
+        <td>
+          <?php if ($promotion['has_products']): ?>
+              <a href="edit-promotionProducts.php?promotion_id=<?= $promotion['promotion_id'] ?>">查看</a>
+          <?php else: ?>
+            <a href="add-promotionProducts.php?promotion_id=<?= $promotion['promotion_id'] ?>"><i class="fa-solid fa-square-plus"></i></a>
+          <?php endif; ?>
+        </td>
+        <td><?= $promotion['start_date'] ?></td>
+        <td><?= $promotion['end_date'] ?></td>
+        <td><?= $promotion['updated_at'] ?></td>
+        <td>
+            <a href="edit-promotion.php?promotion_id=<?= $promotion['promotion_id'] ?>">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+        </td>
+
+        <!-- 顯示搭配商品、變體或類別 -->
+        <!-- <?php foreach ($promotion['products'] as $product): ?>
+            <td>
+                <a href="edit-promotionProducts.php?promotion_id=<?= $promotion['promotion_id'] ?>&product_id=<?= $product['product_id'] ?>">查看商品</a>
+            </td>
+            <td>
+                <a href="edit-promotionProducts.php?promotion_id=<?= $promotion['promotion_id'] ?>&variant_id=<?= $product['variant_id'] ?>">查看變體</a>
+            </td>
+            <td>
+                <a href="edit-promotionProducts.php?promotion_id=<?= $promotion['promotion_id'] ?>&category_id=<?= $product['category_id'] ?>">查看類別</a>
+            </td>
+        <?php endforeach; ?> -->
+    </tr>
+<?php endforeach; ?>
         </tbody>
       </table>
     </div>
@@ -321,25 +320,25 @@ if ($totalRows > 0) {
     const tr = e.target.closest('tr');
     const [
       ,
-      td_product_id,
-      td_product_name,
+      td_promotion_id ,
+      td_promotion_name,
       td_add_variant,
       td_category_tag,
-      td_product_intro,
-      td_product_price,
-      td_product_stock,
-      td_product_status,
+      td_promotion_intro,
+      td_promotion_price,
+      td_promotion_stock,
+      td_promotion_status,
       ,
       ,
       ,
     ] = tr.querySelectorAll('td');
-    const product_id = td_product_id.innerHTML;
-    const product_name = td_product_name.innerHTML;
+    const promotion_id  = td_promotion_id .innerHTML;
+    const promotion_name = td_promotion_name.innerHTML;
     const category_tag = td_category_tag.innerHTML;
-    console.log([td_product_id.innerHTML, product_name.innerHTML]);
-    if (confirm(`是否要刪除編號 ${product_id} 的商品【 ${product_name} 】?`)) {
+    console.log([td_promotion_id .innerHTML, promotion_name.innerHTML]);
+    if (confirm(`是否要刪除編號 ${promotion_id } 的商品【 ${promotion_name} 】?`)) {
       // 使用 JS 做跳轉頁面
-      location.href = `del.php?product_id=${product_id}`;
+      location.href = `del.php?promotion_id =${promotion_id }`;
     }
   }
   const deleteVariant = e => {
@@ -349,7 +348,7 @@ if ($totalRows > 0) {
     const tr = e.target.closest('tr');
     const [
       , //delete
-      td_product_name,
+      td_promotion_name,
       td_variant_id,
       ,
       ,
@@ -364,10 +363,10 @@ if ($totalRows > 0) {
       ,
       , //edit 
     ] = tr.querySelectorAll('td');
-    const product_name = td_product_name.innerHTML;
+    const promotion_name = td_promotion_name.innerHTML;
     const variant_id = td_variant_id.innerHTML;
     const variant_name = td_variant_name.innerHTML;
-    if (confirm(`是否要刪除商品 ${product_name} 的規格 【 ${variant_name} 】 ?`)) {
+    if (confirm(`是否要刪除商品 ${promotion_name} 的規格 【 ${variant_name} 】 ?`)) {
       // 使用 JS 做跳轉頁面
       location.href = `del.php?variant_id=${variant_id}`;
     }

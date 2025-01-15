@@ -15,10 +15,14 @@ $keyword = empty($_GET['keyword']) ? '' : $_GET['keyword'];
 $birth_begin = empty($_GET['birth_begin']) ? '' : $_GET['birth_begin'];
 $birth_end = empty($_GET['birth_end']) ? '' : $_GET['birth_end'];
 
-$where = 'WHERE 1'; #SQL查詢條件開頭
-if (!empty($keyword)) {
-  $keyword_ = $pdo->quote("%$keyword%"); // 字串加上%之後跳脫引號，避免SQL注入
-  $where .= " AND (name LIKE $keyword_ OR mobile LIKE $keyword_)"; #SQL查詢條件結尾
+$where = 'WHERE 1';
+if (isset($_GET['keyword']) && !empty($keyword)) {
+  $keyword = trim($_GET['keyword']); // 去除首尾空白
+  $keyword = trim($keyword, '"'); // 去除可能已存在的引號
+  $keyword_exact = $pdo->quote($keyword); // 用於精確匹配id
+  $keyword = '"' . $keyword . '"'; // 添加新的引號
+  $keyword_ = $pdo->quote("%" . $keyword . "%"); // 字串加上%之後跳脫引號，避免SQL注入
+  $where .= " AND (id = $keyword_exact OR name LIKE $keyword_ OR species LIKE $keyword OR variety LIKE $keyword)";
 }
 
 if (!empty($birth_begin)) {
@@ -34,7 +38,7 @@ if (!empty($birth_end)) {
   }
 }
 
-// 流程:用$pdo做query('select式')再拿去做fetch取值，最後解析json
+// 總筆數查詢
 $t_sql = "SELECT COUNT(1) 
 FROM `pets` $where";
 
@@ -44,6 +48,12 @@ $totalRows = $pdo->query($t_sql)->fetch(PDO::FETCH_NUM)[0];  // 索引式陣列�
 #總頁數
 $totalPages = ceil($totalRows / $perPage); #ceil無條件進位
 
+$allowedColumns = ['id', 'name', 'species', 'variety', 'gender', 'birthday', 'weight', 'chip_number', 'is_adopted'];
+$sort = isset($_GET['sort']) && in_array($_GET['sort'], $allowedColumns) ? $_GET['sort'] : 'id';
+
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'id';
+$order = isset($_GET['order']) && $_GET['order'] == 'asc' ? 'ASC' : 'DESC';
+
 $rows = []; //設定預設值
 if ($totalRows > 0) {
   if ($page > $totalPages) {
@@ -51,12 +61,14 @@ if ($totalRows > 0) {
     header('Location: ?page=' . $totalPages);
     exit;
   }
-  #取第一頁資料
+  # SQL 查詢取第一頁資料
   $sql = sprintf(
     "SELECT * FROM pets 
     %s
-    ORDER BY id ASC LIMIT %s,%s",
+    ORDER BY %s %s LIMIT %s,%s",
     $where,
+    $sort,
+    $order,
     $perPage * ($page - 1),
     $perPage
   );
@@ -67,8 +79,26 @@ if ($totalRows > 0) {
 $qs = array_filter($_GET); #去除值為空的項目
 ?>
 
+
+
 <?php include ROOT_PATH . 'dist/pages/parts/head.php' ?>
 <!--begin::Body-->
+<style>
+  #pet-info th .d-flex {
+    white-space: nowrap;
+  }
+
+  #pet-info th a {
+    margin-left: 5px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #pet-info th a.active-sort {
+    color: initial;
+    /* 當前排序的列使用默認顏色 */
+  }
+</style>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
   <!--begin::App Wrapper 網頁的主要內容在這-->
@@ -107,8 +137,8 @@ $qs = array_filter($_GET); #去除值為空的項目
         <!--begin::Container-->
         <div class="container-fluid">
           <!-- 這裡是內容 -->
-          <div class="row">
-            <div class="col-8">
+          <div class="row align-items-end">
+          <div class="col-8">
               <ul class="pagination">
                 <li class="page-item <?= $page === 1 ? 'disabled' : '' ?>">
                   <a class="page-link "
@@ -155,15 +185,38 @@ $qs = array_filter($_GET); #去除值為空的項目
                 </li>
               </ul>
             </div>
+            <div class="col-4 mb-2">
+              <form role="search" method="GET">
+                <div class="d-flex mb-2">
+                  <input class="form-control me-2" name="keyword"
+                    value="<?= isset($_GET['keyword']) ? htmlspecialchars(trim($_GET['keyword'], '"')) : '' ?>"
+                    type="search" placeholder="搜尋" aria-label="Search">
+                  <button class="btn btn-outline-primary" type="submit">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                  </button>
+                  <button class="btn btn-outline-secondary ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch">
+                    <i class="fa-solid fa-filter"></i>
+                  </button>
+                </div>
 
-            <div class="col-4">
-              <form class="d-flex" role="search">
-                <input class="form-control me-2"
-                  name="keyword" value="<?= empty($_GET['keyword']) ? '' : htmlentities($_GET['keyword']) ?>"
-                  type="search" placeholder="搜尋" aria-label="Search">
-                <button class="btn btn-outline-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <div class="collapse mt-3" id="advancedSearch">
+                  <div class="card card-body">
+                    <div class="mb-3">
+                      <label for="birth_begin" class="form-label">出生日期（起始）</label>
+                      <input type="date" class="form-control" id="birth_begin" name="birth_begin"
+                        value="<?= isset($_GET['birth_begin']) ? htmlspecialchars($_GET['birth_begin']) : '' ?>">
+                    </div>
+                    <div class="mb-3">
+                      <label for="birth_end" class="form-label">出生日期（結束）</label>
+                      <input type="date" class="form-control" id="birth_end" name="birth_end"
+                        value="<?= isset($_GET['birth_end']) ? htmlspecialchars($_GET['birth_end']) : '' ?>">
+                    </div>
+                    <button type="submit" class="btn btn-primary">搜索</button>
+                  </div>
+                </div>
               </form>
             </div>
+            
           </div>
           <div class="row">
             <div class="col-sm-12">
@@ -171,18 +224,41 @@ $qs = array_filter($_GET); #去除值為空的項目
                 <thead>
                   <tr>
                     <th><i class="fa-regular fa-trash-can"></i></th>
-                    <th>id</th>
-                    <th>name</th>
-                    <th>species</th>
-                    <th>variety</th>
-                    <th>gender</th>
-                    <th>birthday</th>
-                    <th>weight</th>
-                    <th>chip_number</th>
-                    <th>is_adopted</th>
+                    <?php
+                    $columns = ['id', 'name', 'species', 'variety', 'gender', 'birthday', 'weight', 'chip_number', 'is_adopted'];
+                    $currentSort = isset($_GET['sort']) ? $_GET['sort'] : '';
+                    $currentOrder = isset($_GET['order']) ? $_GET['order'] : '';
+
+                    foreach ($columns as $col) {
+                      $sortClass = 'fa-arrows-up-down';
+                      $linkClass = '';
+                      $nextOrder = 'desc';
+
+                      if ($currentSort === $col) {
+                        $linkClass = 'text-primary';
+                        if ($currentOrder === 'desc') {
+                          $sortClass = 'fa-arrow-down-wide-short';
+                          $nextOrder = 'asc'; // 如果當前是降序，下一個就是升序
+                        } else {
+                          $sortClass = 'fa-arrow-up-short-wide';
+                          $nextOrder = 'desc'; // 如果當前是升序，下一個就是降序
+                        }
+                      }
+
+                      echo "<th>
+              <div class='d-flex justify-content-between align-items-center'>
+                $col
+                <a href='?sort=$col&order=$nextOrder' class='$linkClass'>
+                  <i class='fa-solid $sortClass'></i>
+                </a>
+              </div>
+            </th>";
+                    }
+                    ?>
                     <th><i class="fa-regular fa-pen-to-square"></i></th>
                     <th>main_photo</th>
                   </tr>
+
                 </thead>
                 <tbody>
                   <?php
@@ -243,18 +319,18 @@ $qs = array_filter($_GET); #去除值為空的項目
   <!--begin::Script-->
   <script>
     const deleteOne = e => {
-        e.preventDefault(); //取消超連結導向
-        const tr = e.target.closest('tr');
-        const [, td_id, td_name] = tr.querySelectorAll('td'); //陣列的解構賦值
-        const id = parseInt(td_id.innerHTML);
-        const name = td_name.innerHTML;
-        console.log('刪除', id, name);
-        if (confirm(`是否要刪除編號為 ${id} 名字為 ${name} 的資料?`)) {
-            // 使用javascript做跳轉頁面
-            location.href = `pet-del.php?id=${id}`;
-        }
+      e.preventDefault(); //取消超連結導向
+      const tr = e.target.closest('tr');
+      const [, td_id, td_name] = tr.querySelectorAll('td'); //陣列的解構賦值
+      const id = parseInt(td_id.innerHTML);
+      const name = td_name.innerHTML;
+      console.log('刪除', id, name);
+      if (confirm(`是否要刪除編號為 ${id} 名字為 ${name} 的資料?`)) {
+        // 使用javascript做跳轉頁面
+        location.href = `pet-del.php?id=${id}`;
+      }
     }
-</script>
+  </script>
   <!--begin::Third Party Plugin(OverlayScrollbars) 可自定義的覆蓋滾動條-->
   <script
     src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js"
@@ -265,7 +341,7 @@ $qs = array_filter($_GET); #去除值為空的項目
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <!--end::Required Plugin(Bootstrap 5)-->
   <!--begin::Required Plugin(AdminLTE)-->
-  <script src="<?=ROOT_URL?>dist/js/adminlte.js"></script>
+  <script src="<?= ROOT_URL ?>dist/js/adminlte.js"></script>
   <!--end::Required Plugin(AdminLTE)-->
   <!--begin::OverlayScrollbars Configure 設定滾動條-->
   <script>
@@ -291,205 +367,51 @@ $qs = array_filter($_GET); #去除值為空的項目
       }
     });
   </script>
+  <?php
+  // 如果有設定標誌就顯示alert
+  if (isset($_SESSION['show_alert']) && $_SESSION['show_alert']) {
+    echo "<script>
+            window.onload = function() {
+                alert('已刪除 ' + {$_SESSION['deleted_id']} + ' ' + '{$_SESSION['deleted_name']}');
+            }
+          </script>";
+    unset($_SESSION['show_alert']); // 使用後清除標誌
+    unset($_SESSION['deleted_id']); // 清除 id
+    unset($_SESSION['deleted_name']); // 清除 name
+  }
+  ?>
   <!--end::OverlayScrollbars Configure-->
   <!-- OPTIONAL SCRIPTS 額外功能&實作-->
-  <!-- sortablejs 在網頁上實現可拖放和可排序的元素-->
-  <script
-    src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"
-    integrity="sha256-ipiJrswvAR4VAx/th+6zWsdeYmVae0iJuiR+6OqHJHQ="
-    crossorigin="anonymous"></script>
-  <!-- 用 sortablejs 把.card-header變成可以拖曳的元素-->
+  <!-- 排序功能 -->
   <script>
-    const connectedSortables = document.querySelectorAll('.connectedSortable');
-    connectedSortables.forEach((connectedSortable) => {
-      let sortable = new Sortable(connectedSortable, {
-        group: 'shared',
-        handle: '.card-header',
+    document.querySelectorAll('th a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = new URL(this.href);
+        const sort = url.searchParams.get('sort');
+        const order = url.searchParams.get('order');
+
+        // 更新所有圖示為預設狀態
+        document.querySelectorAll('th a i').forEach(icon => {
+          icon.className = 'fa-solid fa-arrows-up-down';
+        });
+
+        // 更新當前列的圖示
+        if (order === 'asc') {
+          this.querySelector('i').className = 'fa-solid fa-solid fa-arrow-up-short-wide';
+        } else {
+          this.querySelector('i').className = 'fa-solid fa-arrow-down-wide-short';
+        }
+
+        // 添加排序參數到當前URL並跳轉
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('sort', sort);
+        currentUrl.searchParams.set('order', order);
+        window.location.href = currentUrl.toString();
       });
     });
-
-    const cardHeaders = document.querySelectorAll('.connectedSortable .card-header');
-    cardHeaders.forEach((cardHeader) => {
-      cardHeader.style.cursor = 'move';
-    });
   </script>
-  <!-- 引入 apexcharts 圖表-->
-  <script
-    src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"
-    integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8="
-    crossorigin="anonymous"></script>
-  <!-- apexcharts 生成圖表-->
-  <script>
-    // NOTICE!! DO NOT USE ANY OF THIS JAVASCRIPT
-    // 這些都是假資料，用來展示如何生成表格，實際上線需要替換掉
-    // ++++++++++++++++++++++++++++++++++++++++++
-    // 設定圖表選項
-    const sales_chart_options = {
-      series: [{
-          name: 'Digital Goods',
-          data: [28, 48, 40, 19, 86, 27, 90],
-        },
-        {
-          name: 'Electronics',
-          data: [65, 59, 80, 81, 56, 55, 40],
-        },
-      ],
-      chart: {
-        height: 300,
-        type: 'area',
-        toolbar: {
-          show: false,
-        },
-      },
-      legend: {
-        show: false,
-      },
-      colors: ['#0d6efd', '#20c997'],
-      dataLabels: {
-        enabled: false,
-      },
-      stroke: {
-        curve: 'smooth',
-      },
-      xaxis: {
-        type: 'datetime',
-        categories: [
-          '2023-01-01',
-          '2023-02-01',
-          '2023-03-01',
-          '2023-04-01',
-          '2023-05-01',
-          '2023-06-01',
-          '2023-07-01',
-        ],
-      },
-      tooltip: {
-        x: {
-          format: 'MMMM yyyy',
-        },
-      },
-    };
 
-    const sales_chart = new ApexCharts(
-      document.querySelector('#revenue-chart'),
-      sales_chart_options,
-    );
-    sales_chart.render();
-  </script>
-  <!-- 引入 jsvectormap 用來嵌入互動式地圖-->
-  <script
-    src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"
-    integrity="sha256-/t1nN2956BT869E6H4V1dnt0X5pAQHPytli+1nTZm2Y="
-    crossorigin="anonymous"></script>
-  <script
-    src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"
-    integrity="sha256-XPpPaZlU8S/HWf7FZLAncLg2SAkP8ScUTII89x9D3lY="
-    crossorigin="anonymous"></script>
-  <!-- jsvectormap 生成地圖-->
-  <script>
-    // NOTICE!! DO NOT USE ANY OF THIS JAVASCRIPT
-    // 這些都是假資料，用來展示如何生成地圖，實際上線需要替換掉
-    // ++++++++++++++++++++++++++++++++++++++++++
-    // 設定圖表選項
-    const visitorsData = {
-      US: 398, // USA
-      SA: 400, // Saudi Arabia
-      CA: 1000, // Canada
-      DE: 500, // Germany
-      FR: 760, // France
-      CN: 300, // China
-      AU: 700, // Australia
-      BR: 600, // Brazil
-      IN: 800, // India
-      GB: 320, // Great Britain
-      RU: 3000, // Russia
-    };
-
-    // World map by jsVectorMap
-    const map = new jsVectorMap({
-      selector: '#world-map',
-      map: 'world',
-    });
-
-    // Sparkline charts
-    const option_sparkline1 = {
-      series: [{
-        data: [1000, 1200, 920, 927, 931, 1027, 819, 930, 1021],
-      }, ],
-      chart: {
-        type: 'area',
-        height: 50,
-        sparkline: {
-          enabled: true,
-        },
-      },
-      stroke: {
-        curve: 'straight',
-      },
-      fill: {
-        opacity: 0.3,
-      },
-      yaxis: {
-        min: 0,
-      },
-      colors: ['#DCE6EC'],
-    };
-
-    const sparkline1 = new ApexCharts(document.querySelector('#sparkline-1'), option_sparkline1);
-    sparkline1.render();
-
-    const option_sparkline2 = {
-      series: [{
-        data: [515, 519, 520, 522, 652, 810, 370, 627, 319, 630, 921],
-      }, ],
-      chart: {
-        type: 'area',
-        height: 50,
-        sparkline: {
-          enabled: true,
-        },
-      },
-      stroke: {
-        curve: 'straight',
-      },
-      fill: {
-        opacity: 0.3,
-      },
-      yaxis: {
-        min: 0,
-      },
-      colors: ['#DCE6EC'],
-    };
-
-    const sparkline2 = new ApexCharts(document.querySelector('#sparkline-2'), option_sparkline2);
-    sparkline2.render();
-
-    const option_sparkline3 = {
-      series: [{
-        data: [15, 19, 20, 22, 33, 27, 31, 27, 19, 30, 21],
-      }, ],
-      chart: {
-        type: 'area',
-        height: 50,
-        sparkline: {
-          enabled: true,
-        },
-      },
-      stroke: {
-        curve: 'straight',
-      },
-      fill: {
-        opacity: 0.3,
-      },
-      yaxis: {
-        min: 0,
-      },
-      colors: ['#DCE6EC'],
-    };
-
-    const sparkline3 = new ApexCharts(document.querySelector('#sparkline-3'), option_sparkline3);
-    sparkline3.render();
-  </script>
   <!--end::Script-->
 </body>
 <!--end::Body-->

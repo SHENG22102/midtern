@@ -1638,26 +1638,26 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `user_email`, `user_password`, `user_name`, `user_number`, `user_address`, `user_birthday`, `user_level`, `profile_picture`, `user_status`) VALUES
-(1, 'user1@example.com', 'password1', '王小明', '0912345671', '台北市中正區', '1990-01-01', '愛心小天使', NULL, 'active'),
-(2, 'user2@example.com', 'password2', '李小美', '0923456782', '台中市西屯區', '1992-02-15', '乾爹乾媽', NULL, 'active'),
-(3, 'user3@example.com', 'password3', '陳大同', '0934567893', '高雄市苓雅區', '1988-03-20', '愛心小天使', NULL, 'active'),
-(4, 'user4@example.com', 'password4', '林淑芬', '0945678904', '台南市安平區', '1995-04-10', '乾爹乾媽', NULL, 'active'),
-(5, 'user5@example.com', 'password5', '張志明', '0956789015', '新北市板橋區', '1991-05-25', '愛心小天使', NULL, 'active'),
-(6, 'user6@example.com', 'password6', '黃麗華', '0967890126', '桃園市桃園區', '1989-06-30', '乾爹乾媽', NULL, 'active'),
-(7, 'user7@example.com', 'password7', '蔡建國', '0978901237', '新竹市東區', '1993-07-05', '愛心小天使', NULL, 'active'),
-(8, 'user8@example.com', 'password8', '楊秀英', '0989012348', '基隆市仁愛區', '1994-08-18', '乾爹乾媽', NULL, 'active'),
-(9, 'user9@example.com', 'password9', '吳文雄', '0901234569', '嘉義市東區', '1996-09-22', '愛心小天使', NULL, 'active'),
-(10, 'user10@example.com', 'password10', '劉雅婷', '0913456780', '彰化縣彰化市', '1990-10-12', '乾爹乾媽', NULL, 'active'),
-(11, 'user11@example.com', 'password11', '鄭俊傑', '0924567891', '雲林縣斗六市', '1992-11-08', '愛心小天使', NULL, 'active'),
-(12, 'user12@example.com', 'password12', '謝美玲', '0935678902', '南投縣南投市', '1988-12-03', '乾爹乾媽', NULL, 'active'),
-(13, 'user13@example.com', 'password13', '郭富城', '0946789013', '屏東縣屏東市', '1995-01-28', '愛心小天使', NULL, 'active'),
-(14, 'user14@example.com', 'password14', '林依晨', '0957890124', '宜蘭縣宜蘭市', '1991-02-19', '乾爹乾媽', NULL, 'active'),
-(15, 'user15@example.com', 'password15', '周杰倫', '0968901235', '花蓮縣花蓮市', '1989-03-15', '愛心小天使', NULL, 'active'),
-(16, 'user16@example.com', 'password16', '蔡依林', '0979012346', '台東縣台東市', '1993-04-09', '乾爹乾媽', NULL, 'active'),
-(17, 'user17@example.com', 'password17', '五月天阿信', '0980123457', '澎湖縣馬公市', '1994-05-22', '愛心小天使', NULL, 'active'),
-(18, 'user18@example.com', 'password18', '蘇打綠青峰', '0902345678', '連江縣南竿鄉', '1996-06-16', '乾爹乾媽', NULL, 'active'),
-(19, 'user19@example.com', 'password19', '田馥甄', '0914567899', '苗栗縣苗栗市', '1990-07-07', '愛心小天使', NULL, 'active'),
-(20, 'user20@example.com', 'password20', '蕭敬騰', '0925678900', '金門縣金城鎮', '1992-08-01', '乾爹乾媽', NULL, 'active');
+(1, 'user1@example.com', 'password1', '王小明', '0912345671', '台北市中正區', '1990-01-01', '愛心小天使', NULL, '正常'),
+(2, 'user2@example.com', 'password2', '李小美', '0923456782', '台中市西屯區', '1992-02-15', '乾爹乾媽', NULL, '禁言'),
+(3, 'user3@example.com', 'password3', '陳大同', '0934567893', '高雄市苓雅區', '1988-03-20', '愛心小天使', NULL, '正常'),
+(4, 'user4@example.com', 'password4', '林淑芬', '0945678904', '台南市安平區', '1995-04-10', '乾爹乾媽', NULL, '禁言'),
+(5, 'user5@example.com', 'password5', '張志明', '0956789015', '新北市板橋區', '1991-05-25', '愛心小天使', NULL, '正常'),
+(6, 'user6@example.com', 'password6', '黃麗華', '0967890126', '桃園市桃園區', '1989-06-30', '乾爹乾媽', NULL, '禁言'),
+(7, 'user7@example.com', 'password7', '蔡建國', '0978901237', '新竹市東區', '1993-07-05', '愛心小天使', NULL, '正常'),
+(8, 'user8@example.com', 'password8', '楊秀英', '0989012348', '基隆市仁愛區', '1994-08-18', '乾爹乾媽', NULL, '禁言'),
+(9, 'user9@example.com', 'password9', '吳文雄', '0901234569', '嘉義市東區', '1996-09-22', '愛心小天使', NULL, '正常'),
+(10, 'user10@example.com', 'password10', '劉雅婷', '0913456780', '彰化縣彰化市', '1990-10-12', '乾爹乾媽', NULL, '正常'),
+(11, 'user11@example.com', 'password11', '鄭俊傑', '0924567891', '雲林縣斗六市', '1992-11-08', '愛心小天使', NULL, '正常'),
+(12, 'user12@example.com', 'password12', '謝美玲', '0935678902', '南投縣南投市', '1988-12-03', '乾爹乾媽', NULL, '禁言'),
+(13, 'user13@example.com', 'password13', '郭富城', '0946789013', '屏東縣屏東市', '1995-01-28', '愛心小天使', NULL, '正常'),
+(14, 'user14@example.com', 'password14', '林依晨', '0957890124', '宜蘭縣宜蘭市', '1991-02-19', '乾爹乾媽', NULL, '禁言'),
+(15, 'user15@example.com', 'password15', '周杰倫', '0968901235', '花蓮縣花蓮市', '1989-03-15', '愛心小天使', NULL, '正常'),
+(16, 'user16@example.com', 'password16', '蔡依林', '0979012346', '台東縣台東市', '1993-04-09', '乾爹乾媽', NULL, '禁言'),
+(17, 'user17@example.com', 'password17', '五月天阿信', '0980123457', '澎湖縣馬公市', '1994-05-22', '愛心小天使', NULL, '正常'),
+(18, 'user18@example.com', 'password18', '蘇打綠青峰', '0902345678', '連江縣南竿鄉', '1996-06-16', '乾爹乾媽', NULL, '正常'),
+(19, 'user19@example.com', 'password19', '田馥甄', '0914567899', '苗栗縣苗栗市', '1990-07-07', '愛心小天使', NULL, '正常'),
+(20, 'user20@example.com', 'password20', '蕭敬騰', '0925678900', '金門縣金城鎮', '1992-08-01', '乾爹乾媽', NULL, '正常');
 
 -- --------------------------------------------------------
 

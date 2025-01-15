@@ -1,12 +1,12 @@
 <?php
 // 設定資料庫連接參數
-$host = "172.23.53.156";       // 或者是你指定的資料庫主機
-$db_user = "mfee59";       // 資料庫使用者名稱
-$db_pass = "12345";        // 資料庫密碼
-$db_name = "membercenter"; // 資料庫名稱
+$host = "127.0.0.1";
+$db_username = "root";
+$db_password = "P@ssw0rd";
+$database = "membercenter";
 
 // 建立資料庫連接
-$link = mysqli_connect("172.23.53.156","mfee59", "12345","membercenter");
+$link = mysqli_connect($host, $db_username, $db_password, $database);
 
 // 檢查連接是否成功
 if (!$link) {
@@ -41,16 +41,26 @@ mysqli_close($link);
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>刪除結果</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             text-align: center;
             padding: 50px;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
         }
         .message {
-            font-size: 18px;
-            color: #555;
+            font-size: 20px;
             margin-bottom: 20px;
         }
         .success {
@@ -60,7 +70,8 @@ mysqli_close($link);
             color: red;
         }
         .button {
-            padding: 10px 20px;
+            display: inline-block;
+            padding: 12px 24px;
             background-color: #4CAF50;
             color: white;
             border: none;
@@ -68,20 +79,26 @@ mysqli_close($link);
             font-size: 16px;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         .button:hover {
             background-color: #45a049;
+        }
+        .button:focus {
+            outline: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="message <?php echo (isset($message) && strpos($message, "成功") !== false) ? 'success' : 'failure'; ?>">
-        <?php echo $message; ?>
-    </div>
+    <div class="container">
+        <div class="message <?php echo (isset($message) && strpos($message, "成功") !== false) ? 'success' : 'failure'; ?>">
+            <?php echo $message; ?>
+        </div>
 
-    <!-- 按鈕會在幾秒後引導回會員列表頁 -->
-    <a href="members_list.php" class="button">返回會員列表</a>
+        <!-- 按鈕會在幾秒後引導回會員列表頁 -->
+        <a href="members_list.php" class="button">返回會員列表</a>
+    </div>
 
     <script>
         // 讓頁面顯示一段時間後自動跳轉到會員列表頁

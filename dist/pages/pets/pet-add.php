@@ -7,6 +7,21 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
 ?>
 <?php include ROOT_PATH . 'dist/pages/parts/head.php' ?>
 <!--begin::Body-->
+<style>
+  form .mb-3 .form-text {
+    display: none;
+    color: red;
+  }
+
+  form .mb-3.error input.form-control {
+    border: 2px solid red;
+  }
+
+  form .mb-3.error .form-text {
+    display: block;
+    color: red;
+  }
+</style>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
   <!--begin::App Wrapper 網頁的主要內容在這-->
@@ -49,7 +64,7 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
               <div class="card card-primary card-outline mb-4">
                 <!--begin::Header-->
                 <div class="card-header">
-                  <div class="card-title">Example</div>
+                  <div class="card-title">表單</div>
                 </div>
                 <!--end::Header-->
                 <!--begin::Form-->
@@ -65,10 +80,10 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
                     <div class="row mb-3 align-items-center">
                       <label for="species" class="col-sm-2 col-form-label">物種 **</label>
                       <div class="col-sm-10">
-                        <select class="form-select" aria-label="select species">
-                          <option selected>請選擇</option>
-                          <option value="1">狗</option>
-                          <option value="2">貓</option>
+                        <select class="form-select" aria-label="select species" name="species">
+                          <option value="null" selected>請選擇</option>
+                          <option value="狗">狗</option>
+                          <option value="貓">貓</option>
                         </select>
                       </div>
                       <div class="form-text"></div>
@@ -80,17 +95,17 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
                       </div>
                     </div>
                     <div class="row mb-3 align-items-center">
-                      <label for="variety" class="col-sm-2 col-form-label">性別 **</label>
+                      <div class="col-sm-2 col-form-label">性別 **</div>
                       <div class="col-sm-1">
                         <div class="form-check">
                           <input
                             class="form-check-input"
                             type="radio"
-                            name="genderRadios"
+                            name="gender"
                             id="genderRadios1"
-                            value="male"
+                            value="公"
                             checked />
-                          <label class="form-check-label" for="gridRadios1"> 公 </label>
+                          <label class="form-check-label" for="genderRadios1"> 公 </label>
                         </div>
                       </div>
                       <div class="col-sm-1">
@@ -98,10 +113,10 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
                           <input
                             class="form-check-input"
                             type="radio"
-                            name="genderRadios"
+                            name="gender"
                             id="genderRadios2"
-                            value="female" />
-                          <label class="form-check-label" for="gridRadios1"> 母 </label>
+                            value="母" />
+                          <label class="form-check-label" for="genderRadios2"> 母 </label>
                         </div>
                       </div>
                     </div>
@@ -115,17 +130,17 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
                     <div class="row mb-3 align-items-center">
                       <label for="weight" class="col-sm-2 col-form-label">體重</label>
                       <div class="col-sm-10">
-                        <input type="number" class="form-control" id="weight" name="weight">
+                        <input type="number" class="form-control" id="weight" name="weight" step="0.01">
                       </div>
                     </div>
                     <div class="row mb-3 align-items-center">
                       <label for="chip" class="col-sm-2 col-form-label">晶片號碼</label>
                       <div class="col-sm-10">
-                        <input type="number" class="form-control" id="chip" name="chip">
+                        <input type="number" class="form-control" id="chip" name="chip" value="">
                       </div>
                     </div>
                     <div class="row mb-3 align-items-center">
-                      <label for="is-adopted" class="col-sm-2 col-form-label">是否領養 **</label>
+                      <div class="col-sm-2 col-form-label">是否領養 **</div>
                       <div class="col-sm-1">
                         <div class="form-check">
                           <input
@@ -133,7 +148,7 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
                             type="radio"
                             name="is-adopted"
                             id="is-adopted1"
-                            value="false"
+                            value="0"
                             checked />
                           <label class="form-check-label" for="is-adopted1"> 否 </label>
                         </div>
@@ -145,7 +160,7 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
                             type="radio"
                             name="is-adopted"
                             id="is-adopted2"
-                            value="true" />
+                            value="1" />
                           <label class="form-check-label" for="is-adopted2"> 是 </label>
                         </div>
                       </div>
@@ -158,7 +173,7 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
                     </div>
                     <div class="card-footer">
                       <button type="submit" class="btn btn-warning">提交</button>
-                      <button type="submit" class="btn btn-light float-end">取消</button>
+                      <button type="button" class="btn btn-light float-end" onclick="goBack()">取消</button>
                     </div>
                 </form>
                 <!--end::Form-->
@@ -188,7 +203,7 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-            <a href="list.php" class="btn btn-primary">回到列表</a>
+            <a href="pet-list.php" class="btn btn-primary">回到列表</a>
           </div>
         </div>
       </div>
@@ -244,11 +259,12 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
     // const emailField = document.querySelector('#email');
     const myModal = new bootstrap.Modal('#pet-add-modal');
 
-    function validateEmail(email) {
-      // 使用 regular expression 檢查 email 格式正不正確
-      const pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zAZ]{2,}))$/;
-      return pattern.test(email);
-    }
+    // function validateEmail(email) {
+    //   // 使用 regular expression 檢查 email 格式正不正確
+    //   const pattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zAZ]{2,}))$/;
+    //   return pattern.test(email);
+    // }
+
     const sendData = e => {
       e.preventDefault(); //不要讓表單送出
 
@@ -260,22 +276,22 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
 
       if (nameField.value.length < 2) {
         isPass = false;
-        nameField.nextElementSibling.innerHTML = '姓名至少要兩個字';
+        nameField.nextElementSibling.innerHTML = '名字至少要兩個字';
         nameField.closest('.mb-3').classList.add('error');
       }
 
-      if (!validateEmail(emailField.value)) {
-        isPass = false;
-        emailField.nextElementSibling.innerHTML = '請填寫正確的email';
-        emailField.closest('.mb-3').classList.add('error');
-      }
+      // if (!validateEmail(emailField.value)) {
+      //   isPass = false;
+      //   emailField.nextElementSibling.innerHTML = '請填寫正確的email';
+      //   emailField.closest('.mb-3').classList.add('error');
+      // }
 
       //isPass = false;
       if (isPass) {
         //先做一個空的表單
         const fd = new FormData(document.forms[0]);
 
-        fetch(`add-api.php`, {
+        fetch(`./api/pet-add-api.php`, {
             method: 'POST',
             body: fd
           }).then(r => r.json())
@@ -289,6 +305,10 @@ $pageName = "pet-add"; // 這個變數可修改，用在sidebar的按鈕active
           }).catch(console.warn);
       }
 
+    }
+
+    function goBack() {
+      window.history.back();
     }
   </script>
   <!--end::Script-->

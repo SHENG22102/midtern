@@ -1,83 +1,153 @@
 use shopping_store;
--- 1. 插入商品分類 (Categories)
+-- 插入假使用者資訊
+INSERT INTO Users (user_id, user_name)
+VALUES 
+    (1, 'User1'),
+    (2, 'User2'),
+    (3, 'User3'),
+    (4, 'User4'),
+    (5, 'User5'),
+    (6, 'User6'),
+    (7, 'User7'),
+	(8, 'User8'),
+    (9, 'User9'),
+    (10, 'User10');
+
+--  插入商品分類 (Categories)
 INSERT INTO Categories (
 category_name, 
 category_tag, 
 category_description, 
 parent_id) 
 VALUES
-('Electronics', 'ELEC', 'Electronic gadgets and devices', NULL),
-('Fashion', 'FASH', 'Clothing and accessories', NULL),
-('Smartphones', 'SMART', 'Latest smartphones', 1),
-('Laptops', 'LAPTOP', 'Portable computers', 1),
-('Shoes', 'SHOES', 'Different types of footwear', 2);
+('電子產品', 'ELEC', '電子產品及設備', NULL),
+('時尚', 'FASH', '服裝及配件', NULL),
+('智能手機', 'PHON', '最新智能手機', 1),
+('筆記型電腦', 'LAP', '便攜式電腦', 1),
+('鞋類', 'SHOE', '各種鞋類', 2);
 
--- 2. 插入商品 (Products)
+-- 插入商品 (Products)
 INSERT INTO Products (
 product_name, 
 product_description, 
-price, category_id, 
+price, 
+category_id, 
 product_status, 
 image_url, 
 stock_quantity)
 VALUES
--- Electronics (category_id = 1)
-('Electronic Product 1', 'Description for Electronic Product 1', 100, 1, '上架', 'https://placehold.co/100x100', 50),
-('Electronic Product 2', 'Description for Electronic Product 2', 150, 1, '上架', 'https://placehold.co/100x100', 30),
+-- 電子產品 (category_id = 1)
+('電子產品 1', '電子產品 1 的描述', 100, 1, '上架', 'https://placehold.co/100x100', 50),
+('電子產品 2', '電子產品 2 的描述', 150, 1, '上架', 'https://placehold.co/100x100', 30),
 
--- Fashion (category_id = 2)
-('Fashion Product 1', 'Description for Fashion Product 1', 80, 2, '上架', 'https://placehold.co/100x100', 70),
-('Fashion Product 2', 'Description for Fashion Product 2', 120, 2, '上架', 'https://placehold.co/100x100', 40),
+-- 時尚 (category_id = 2)
+('時尚商品 1', '時尚商品 1 的描述', 80, 2, '上架', 'https://placehold.co/100x100', 70),
+('時尚商品 2', '時尚商品 2 的描述', 120, 2, '上架', 'https://placehold.co/100x100', 40),
 
--- Smartphones (category_id = 3)
-('Smartphone Product 1', 'Description for Smartphone Product 1', 200, 3, '上架', 'https://placehold.co/100x100', 20),
-('Smartphone Product 2', 'Description for Smartphone Product 2', 250, 3, '上架', 'https://placehold.co/100x100', 25),
+-- 智能手機 (category_id = 3)
+('智能手機 1', '智能手機 1 的描述', 200, 3, '上架', 'https://placehold.co/100x100', 20),
+('智能手機 2', '智能手機 2 的描述', 250, 3, '上架', 'https://placehold.co/100x100', 25),
 
--- Laptops (category_id = 4)
-('Laptop Product 1', 'Description for Laptop Product 1', 500, 4, '上架', 'https://placehold.co/100x100', 10),
-('Laptop Product 2', 'Description for Laptop Product 2', 550, 4, '上架', 'https://placehold.co/100x100', 15),
+-- 筆記型電腦 (category_id = 4)
+('筆記型電腦 1', '筆記型電腦 1 的描述', 500, 4, '上架', 'https://placehold.co/100x100', 10),
+('筆記型電腦 2', '筆記型電腦 2 的描述', 550, 4, '上架', 'https://placehold.co/100x100', 15),
 
--- Shoes (category_id = 5)
-('Shoe Product 1', 'Description for Shoe Product 1', 60, 5, '上架', 'https://placehold.co/100x100', 80),
-('Shoe Product 2', 'Description for Shoe Product 2', 70, 5, '上架', 'https://placehold.co/100x100', 90);
+-- 鞋類 (category_id = 5)
+('鞋子 1', '鞋子 1 的描述', 60, 5, '上架', 'https://placehold.co/100x100', 80),
+('鞋子 2', '鞋子 2 的描述', 70, 5, '上架', 'https://placehold.co/100x100', 90);
 
 
 
--- 3. 插入商品變體 (Product_Variants)
 INSERT INTO Product_Variants (
-product_id, 
-variant_name, 
-price, 
-stock_quantity, 
-image_url)
+    product_id, 
+    variant_name, 
+    price, 
+    stock_quantity, 
+    image_url
+) 
 VALUES
--- Variants for Electronic Product 1 (product_id = 1)
-(1, 'Electronic Product 1 - Variant A', 110, 20, 'https://placehold.co/100x100'),
-(1, 'Electronic Product 1 - Variant B', 120, 15, 'https://placehold.co/100x100'),
+-- 電子產品 1 的變體 (product_id = 1)
+(1, '電子產品 1 - 變體 A', 110, 20, 'https://placehold.co/100x100'),
 
--- Variants for Fashion Product 1 (product_id = 3)
-(3, 'Fashion Product 1 - Variant A', 90, 50, 'https://placehold.co/100x100'),
-(3, 'Fashion Product 1 - Variant B', 100, 40, 'https://placehold.co/100x100');
+-- 電子產品 2 的變體 (product_id = 2)
+(2, '電子產品 2 - 變體 A', 130, 25, 'https://placehold.co/100x100'),
+
+-- 時尚商品 1 的變體 (product_id = 3)
+(3, '時尚商品 1 - 變體 A', 90, 50, 'https://placehold.co/100x100'),
+
+-- 時尚商品 2 的變體 (product_id = 4)
+(4, '時尚商品 2 - 變體 A', 110, 30, 'https://placehold.co/100x100'),
+
+-- 時尚商品 3 的變體 (product_id = 5)
+(5, '時尚商品 3 - 變體 A', 130, 20, 'https://placehold.co/100x100'),
+
+-- 時尚商品 4 的變體 (product_id = 6)
+(6, '時尚商品 4 - 變體 A', 150, 20, 'https://placehold.co/100x100'),
+
+-- 時尚商品 5 的變體 (product_id = 7)
+(7, '時尚商品 5 - 變體 A', 170, 15, 'https://placehold.co/100x100'),
+
+-- 時尚商品 6 的變體 (product_id = 8)
+(8, '時尚商品 6 - 變體 A', 190, 30, 'https://placehold.co/100x100'),
+
+-- 時尚商品 7 的變體 (product_id = 9)
+(9, '時尚商品 7 - 變體 A', 210, 30, 'https://placehold.co/100x100'),
+
+-- 時尚商品 8 的變體 (product_id = 10)
+(10, '時尚商品 8 - 變體 A', 230, 25, 'https://placehold.co/100x100');
 
 
-
--- 插入假訂單
 INSERT INTO Orders (
-    order_id, user_id, total_price, order_status, 
-    payment_method, payment_status, 
-    invoice_method, invoice, 
-    recipient_name, recipient_phone, recipient_email, 
-    remark, shipping_method, shipping_address, 
-    tracking_number, shipped_at, created_at, finish_at
-)
+    order_id, 
+    user_id, 
+    total_price, 
+    order_status, 
+    payment_method, 
+    payment_status, 
+    invoice_method, 
+    invoice, 
+    recipient_name, 
+    recipient_phone, 
+    recipient_email, 
+    remark, 
+    shipping_method, 
+    shipping_address, 
+    tracking_number, 
+    shipped_at, 
+    created_at, 
+    finish_at, 
+    mobile_barcode, -- 手機載具
+    taxID_number -- 統編
+) 
 VALUES
-('ORD00001', 1, 5000, 'Completed', 'Credit Card', 'Paid', 'Electronic', 'INV00001', 'Alice', '123456789', 'alice@example.com', 'No remark', 'Standard Shipping', '123 Main St, City', 'TRK123456', NOW(), NOW(), NOW()),
-('ORD00002', 2, 4500, 'Processing', 'PayPal', 'Pending', 'Paper', 'INV00002', 'Bob', '987654321', 'bob@example.com', 'Handle with care', 'Express Shipping', '456 Elm St, City', NULL, NULL, NOW(), NULL),
-('ORD00003', 3, 3200, 'Shipped', 'Bank Transfer', 'Paid', 'Electronic', 'INV00003', 'Charlie', '112233445', 'charlie@example.com', 'Gift wrap', 'Standard Shipping', '789 Oak St, City', 'TRK789123', NOW(), NOW(), NULL),
-('ORD00004', 4, 6200, 'Pending', 'Credit Card', 'Failed', 'Electronic', 'INV00004', 'Diana', '556677889', 'diana@example.com', 'No remark', 'Express Shipping', '101 Pine St, City', NULL, NULL, NOW(), NULL),
-('ORD00005', 5, 2100, 'Completed', 'Cash', 'Paid', 'Paper', 'INV00005', 'Eve', '998877665', 'eve@example.com', 'Urgent', 'Standard Shipping', '202 Birch St, City', 'TRK456789', NOW(), NOW(), NOW());
+-- 訂單 1
+('ORD00001', 1, 500, '待出貨', '紙本', '已付款', '紙本', 'INV12345', 
+ '王小明', '0912345678', 'li.dahua@example.com', '請於上午配送', '宅配', '台北市信義區XX路XX號', 
+ 'TRACK001', NULL, NOW(), NULL, NULL, '12345678'),
 
--- 插入假訂單商品
+-- 訂單 2
+('ORD00002', 2, 300, '已出貨', '載具', '已付款', '載具', 'INV67890', 
+ '李大華', '0911223344', 'li.dahua@example.com', '門市取貨後聯繫', '7-11', '7-11門市', 
+ 'TRACK002', NOW(), NOW(), NULL, '/ABCD123', NULL),
+
+-- 訂單 3
+('ORD00003', 3, 1200, '已完成', '統編', '已付款', '統編', 'INV11223', 
+ '陳美麗', '0987654321', 'li.dahua@example.com', '感謝服務，請保持聯繫', '全家', '全家門市', 
+ 'TRACK003', NOW(), NOW(), NOW(), NULL, '87654321'),
+
+-- 訂單 4
+('ORD00004', 4, 800, '待出貨', '載具', '已付款', '紙本', 'INV33445', 
+ '黃俊傑', '0911223344', 'li.dahua@example.com', '請提前通知配送時間', '宅配', '新竹市東區XX路XX號', 
+ 'TRACK004', NULL, NOW(), NULL, '/XYZ9876', NULL),
+
+-- 訂單 5
+('ORD00005', 5, 450, '已出貨', '紙本', '已付款', '統編', 'INV55667', 
+ '林佩真', '0911223344', 'pei.zhen@example.com', '門市領取後無需聯繫', '7-11', '7-11門市', 
+ 'TRACK005', NOW(), NOW(), NULL, NULL, '56781234');
+
+
+
+# 插入假訂單商品
 INSERT INTO Order_Items (
     order_id, product_id, variant_id, quantity, price, return_status, returned_quantity
 )
@@ -112,6 +182,8 @@ VALUES
 ('ORD00005', 3, 3, 2, 600, NULL, 0),
 ('ORD00005', 4, 4, 1, 300, NULL, 0),
 ('ORD00005', 5, 5, 1, 300, NULL, 0);
+
+
 
 
 select * from Categories;
