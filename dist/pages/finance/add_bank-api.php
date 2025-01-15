@@ -1,4 +1,4 @@
-<?php
+<?php 
 require __DIR__ . '/parts/init.php';
 header('Content-Type: application/json');
 
