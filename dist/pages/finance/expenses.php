@@ -92,7 +92,7 @@ JOIN manager ON expenses.created_by = manager.id
             <th>支出金額</th>
             <th>支出日期</th>
             <th>支出描述</th>
-            <th>退款編號</th>
+            <th style="display: none;">退款編號</th>
             <th>記錄人員</th>
             <th><i class="fa-solid fa-pen-to-square"></i></th>
           </tr>
@@ -108,7 +108,7 @@ JOIN manager ON expenses.created_by = manager.id
               <td><?= $r['amount'] ?></td>
               <td><?= $r['expense_date'] ?></td>
               <td><?= $r['e_description'] ?></td>
-              <td><?= $r['refund_id'] ?></td>
+              <td style="display: none;"><?= $r['refund_id'] ?></td>
               <td><?= $r['created_by'] ?></td>
               <td><a href="edit_expenses.php?bn_id=<?= $r['id'] ?>">
                   <i class="fa-solid fa-pen-to-square"></i>
@@ -133,7 +133,7 @@ JOIN manager ON expenses.created_by = manager.id
     console.log([bn_name.innerHTML]);
     if (confirm(`是否要刪除支出編號為 ${bn_id} ，支出項目為 ${bn_name} 的捐款紀錄?`)) {
       // 使用 JS 做跳轉頁面
-      location.href = `del.php?id=${bn_id}`;
+      location.href = `del_expenses.php?id=${bn_id}`;
     }
   };
 </script>

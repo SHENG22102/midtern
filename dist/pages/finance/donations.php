@@ -87,6 +87,7 @@ if ($totalRows > 0) {
         <thead>
           <tr>
             <th><i class="fa-solid fa-trash"></i></th>
+            <th>捐款編號</th>
             <th>會員編號</th>
             <th>捐款人姓名</th>
             <th>捐款人電話</th>
@@ -110,6 +111,7 @@ if ($totalRows > 0) {
                   <i class="fa-solid fa-trash"></i>
                 </a></td>
               <td style="display:none"><?= $r['id'] ?></td>
+              <td><?= $r['id'] ?></td>
               <td><?= $r['user_id'] ?></td>
               <td><?= $r['donor_name'] ?></td>
               <td><?= $r['donor_phone'] ?></td>

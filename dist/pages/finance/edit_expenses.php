@@ -23,12 +23,14 @@ if (empty($r)) {
       <h2>編輯支出資料</h2>
       <form id="editForm" action="edit_expenses-api.php" method="POST" novalidate>
         <div class="mb-3">
-          <label for="expenses_id" class="form-label">支出編號</label>          <input type="text" class="form-control" id="expenses_id" name="expenses_id" value="<?= $r['id'] ?>"
+          <label for="expenses_id" class="form-label">支出編號</label> 
+          <input type="text" class="form-control" id="expenses_id" name="expenses_id" value="<?= $r['id'] ?>"
             readonly>
         </div>
         <div class="mb-3">
           <label for="expense_purpose" class="form-label">支出項目</label>
           <select class="form-select" id="expense_purpose" name="expense_purpose" required>
+            <option value="線上認養" <?= $r['expense_purpose'] == '線上認養' ? 'selected' : '' ?>>線上認養</option>
             <option value="食品採購" <?= $r['expense_purpose'] == '食品採購' ? 'selected' : '' ?>>食品採購</option>
             <option value="醫療費用" <?= $r['expense_purpose'] == '醫療費用' ? 'selected' : '' ?>>醫療費用</option>
             <option value="行政開支" <?= $r['expense_purpose'] == '行政開支' ? 'selected' : '' ?>>行政開支</option>
@@ -50,14 +52,14 @@ if (empty($r)) {
           <textarea class="form-control" id="e_description" name="e_description"
             value="<?= $r['e_description'] ?>" required><?= $r['e_description'] ?></textarea>
         </div>
-        <div class="mb-3">
+        <div class="mb-3" style="display: none;">
           <label for="refund_id" class="form-label">退款編號</label>
           <input type="text" class="form-control" id="refund_id" name="refund_id" value="<?= $r['refund_id'] ?>"
             readonly>
         </div>
         <div class="mb-3">
           <label for="created_by" class="form-label">記錄人員</label>
-          <input type="text" class="form-control" id="created_by" name="created_by" value="<?= $r['created_by'] ?>"readonly>
+          <input type="text" class="form-control" id="created_by" name="created_by" value="<?= $r['created_by'] ?>" readonly>
         </div>
         <button type="submit" class="btn btn-primary">更新資料</button>
       </form>
@@ -79,7 +81,7 @@ if (empty($r)) {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-        <a class="btn btn-primary" href="bank.php">回到列表頁</a>
+        <a class="btn btn-primary" href="expenses.php">回到列表頁</a>
       </div>
     </div>
   </div>

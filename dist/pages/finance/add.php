@@ -70,13 +70,6 @@ $pageName = "add";
             <option value="郵政劃撥">郵政劃撥</option>
           </select>
         </div>
-        <div class="mb-3">
-          <label for="reconciliation_status" class="form-label">對帳狀態</label>
-          <select class="form-select" id="reconciliation_status" name="reconciliation_status" required>
-            <option value="已完成">已完成</option>
-            <option value="未完成">未完成</option>
-          </select>
-        </div>
         <div class="form-check" style="display:none;">
           <input class="form-check-input" type="radio" name="is_receipt_needed" value="0" id="statusPending" checked>
           <label class="form-check-label" for="statusPending">

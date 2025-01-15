@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $donation = $stmt->fetch(PDO::FETCH_ASSOC);
 
   if (!$donation) {
-      // 如果 donation_id 不存在，顯示錯誤並終止
-      $errorMessage = "提供的捐款 ID 不存在。";
+    // 如果 donation_id 不存在，顯示錯誤並終止
+    $errorMessage = "提供的捐款 ID 不存在。";
   }
 }
 ?>
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="col-6">
       <h2>新增銀行轉帳資料</h2>
       <form onsubmit="sendData(event)" novalidate>
-      <div class="mb-3">
+        <div class="mb-3">
           <label for="donation_id" class="form-label">捐款編號</label>
           <input type="text" class="form-control" id="donation_id" name="donation_id" required>
           <?php if (isset($errorMessage)): ?>
@@ -45,16 +45,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mb-3">
           <label for="transfer_amount" class="form-label">匯款金額</label>
           <input type="number" class="form-control" id="transfer_amount" name="transfer_amount" required>
+          <div class="form-text"></div>
         </div>
 
         <div class="mb-3">
           <label for="transfer_date" class="form-label">匯款日期</label>
           <input type="date" class="form-control" id="transfer_date" name="transfer_date" required>
+          <div class="form-text"></div>
         </div>
 
         <div class="mb-3">
-          <label for="id_or_tax_id_number" class="form-label">帳號末五碼</label>
-          <input type="text" class="form-control" id="id_or_tax_id_number" name="id_or_tax_id_number" required>
+          <label for="account_last_5" class="form-label">帳號末五碼</label>
+          <input type="text" class="form-control" id="account_last_5" name="account_last_5" required>
+          <div class="form-text"></div>
         </div>
 
         <div class="mb-3">
@@ -104,8 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     const donorNameField = document.querySelector('#donor_name');
     const transferAmountField = document.querySelector('#transfer_amount');
     const transferDateField = document.querySelector('#transfer_date');
-    const idOrTaxIdNumberField = document.querySelector('#id_or_tax_id_number');
+    const account_last_5Field = document.querySelector('#account_last_5');
     const reconciliationStatusField = document.querySelector('#reconciliation_status');
+
 
     let isPass = true;
 
@@ -113,24 +117,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (donationIdField.value.trim() === '') {
       isPass = false;
       donationIdField.closest('.mb-3').classList.add('error');
-      donationIdField.nextElementSibling.innerHTML = "請填寫正確的捐款編號";
+      const errorField = donationIdField.nextElementSibling;
+      if (errorField) {
+        errorField.innerHTML = "請填寫正確的捐款編號";
+      }
     } else {
       donationIdField.closest('.mb-3').classList.remove('error');
     }
 
-    // Validate other fields
-    if (donorNameField.value.trim().length < 2) {
+    if (donorNameField.value.trim() === '') {
       isPass = false;
       donorNameField.closest('.mb-3').classList.add('error');
-      donorNameField.nextElementSibling.innerHTML = "請填寫正確的姓名";
+      const errorField = donorNameField.nextElementSibling;
+      if (errorField) {
+        errorField.innerHTML = "請填寫正確的姓名";
+      }
+    } else {
+      donorNameField.closest('.mb-3').classList.remove('error');
     }
 
     if (transferAmountField.value <= 0) {
       isPass = false;
       transferAmountField.closest('.mb-3').classList.add('error');
-      transferAmountField.nextElementSibling.innerHTML = "請填寫正確的匯款金額";
+      const errorField = transferAmountField.nextElementSibling;
+      if (errorField) {
+        errorField.innerHTML = "請輸入正確的匯款金額";
+      }
+    } else {
+      transferAmountField.closest('.mb-3').classList.remove('error');
     }
 
+    if (transferDateField.value.trim() === '') {
+      isPass = false;
+      transferDateField.closest('.mb-3').classList.add('error');
+      const errorField = transferDateField.nextElementSibling;
+      if (errorField) {
+        errorField.innerHTML = "請選擇匯款日期";
+      }
+    } else {
+      transferDateField.closest('.mb-3').classList.remove('error');
+    }
     if (isPass) {
       const fd = new FormData(document.forms[0]);
 

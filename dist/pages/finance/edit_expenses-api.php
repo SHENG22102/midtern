@@ -23,6 +23,9 @@ if (empty($id) || empty($expense_purpose) || empty($amount) || empty($expense_da
     echo json_encode($output, JSON_UNESCAPED_UNICODE);
     exit;
 }
+if ($refund_id == ''){
+    $refund_id = null;
+}
 
 // 更新審核資料
 $sql_update_expenses = "UPDATE expenses SET 

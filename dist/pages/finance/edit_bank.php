@@ -42,10 +42,10 @@ if (empty($r)) {
           <label for="transfer_date" class="form-label">匯款日期</label>
           <input type="date" class="form-control" id="transfer_date" name="transfer_date" value="<?= $r['transfer_date'] ?>" required>
         </div>
-        <div class="mb-3" id="id_or_tax_id_number">
-          <label for="id_or_tax_id_number" class="form-label">帳號末五碼</label>
-          <input type="text" class="form-control" id="id_or_tax_id_number" name="id_or_tax_id_number"
-            value="<?= $r['id_or_tax_id_number'] ?>" required>
+        <div class="mb-3" id="account_last_5">
+          <label for="account_last_5" class="form-label">帳號末五碼</label>
+          <input type="text" class="form-control" id="account_last_5" name="account_last_5"
+            value="<?= $r['account_last_5'] ?>" required>
         </div>
         <div class="mb-3">
           <label for="reconciliation_status" class="form-label">對帳狀態</label>
