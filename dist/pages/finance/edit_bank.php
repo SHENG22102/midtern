@@ -25,6 +25,11 @@ if (empty($r)) {
         <input type="hidden" name="bn_id" value="<?= $r['id'] ?>">
 
         <div class="mb-3">
+          <label for="donation_id" class="form-label">捐款編號</label>
+          <input type="text" class="form-control" id="donation_id" name="donation_id" value="<?= $r['donation_id'] ?>"
+            required readonly>
+        </div>
+        <div class="mb-3">
           <label for="donor_name" class="form-label">捐款人姓名</label>
           <input type="text" class="form-control" id="donor_name" name="donor_name" value="<?= $r['donor_name'] ?>"
             required>

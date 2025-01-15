@@ -27,7 +27,12 @@ if ($totalRows > 0) {
   }
 
   # 取第一頁的資料
-  $sql = sprintf("SELECT * FROM donations LIMIT %d, %d", ($page - 1) * $perPage, $perPage);
+  # 取第一頁的資料，並與 bank_transfer_details 進行聯結查詢
+  $sql = sprintf("SELECT donations.*, bank_transfer_details.reconciliation_status AS bank_reconciliation_status 
+  FROM donations
+  LEFT JOIN bank_transfer_details ON donations.id = bank_transfer_details.donation_id 
+  LIMIT %d, %d", ($page - 1) * $perPage, $perPage);
+
   $rows = $pdo->query($sql)->fetchAll(); # 取得該分頁的資料
 }
 
@@ -118,7 +123,7 @@ if ($totalRows > 0) {
               <td><?= $r['regular_payment_date'] ?></td>
               <td><?= $r['payment_method'] ?></td>
               <td><?= $r['create_datetime'] ?></td>
-              <td><?= $r['reconciliation_status'] ?></td>
+              <td><?= $r['bank_reconciliation_status'] ?></td>
               <td>
                 <?= $r['is_receipt_needed'] == 1 ? '<a href="javascript:void(0);" class="receipt-link" data-receipt_id="' . $r['id'] . '" data-receipt_name="' . htmlentities($r['donor_name']) . '">收據</a>' : '無收據'; ?>
               </td>

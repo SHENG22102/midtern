@@ -52,8 +52,8 @@ $amount = intval($_POST['amount']); // 轉為整數
 
 // 取得其他 POST 資料
 $donor_name = $_POST['donor_name'];
-$donor_phone = $_POST['donor_phone'];
-$donor_email = $_POST['donor_email'];
+$donor_phone = $_POST['donor_phone'] ?? '';
+$donor_email = $_POST['donor_email'] ?? '';
 $amount = $_POST['amount'];
 $donation_type = $_POST['donation_type'];
 $pet_id = $_POST['pet_id'];
