@@ -50,8 +50,8 @@ if (empty($r)) {
         <div class="mb-3">
           <label for="reconciliation_status" class="form-label">對帳狀態</label>
           <select class="form-select" id="reconciliation_status" name="reconciliation_status" required>
-            <option value="已完成" <?= $r['reconciliation_status'] == '已完成' ? 'selected' : '' ?>>已完成</option>
-            <option value="未完成" <?= $r['reconciliation_status'] == '未完成' ? 'selected' : '' ?>>未完成</option>
+            <option value="已核對" <?= $r['reconciliation_status'] == '已完成' ? 'selected' : '' ?>>已核對</option>
+            <option value="未核對" <?= $r['reconciliation_status'] == '未完成' ? 'selected' : '' ?>>未核對</option>
             <option value="不成立" <?= $r['reconciliation_status'] == '不成立' ? 'selected' : '' ?>>不成立</option>
           </select>
         </div>

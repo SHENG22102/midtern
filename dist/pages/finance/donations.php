@@ -28,15 +28,13 @@ if ($totalRows > 0) {
 
   # 取第一頁的資料
   # 取第一頁的資料，並與 bank_transfer_details 進行聯結查詢
-  $sql = sprintf("SELECT donations.*, bank_transfer_details.reconciliation_status AS bank_reconciliation_status 
+  $sql = sprintf("SELECT donations.*, bank_transfer_details.reconciliation_status
   FROM donations
   LEFT JOIN bank_transfer_details ON donations.id = bank_transfer_details.donation_id 
   LIMIT %d, %d", ($page - 1) * $perPage, $perPage);
 
   $rows = $pdo->query($sql)->fetchAll(); # 取得該分頁的資料
-}
-
-
+};
 ?>
 <?php include __DIR__ . '/parts/html-head.php' ?>
 <?php include __DIR__ . '/parts/html-navbar.php' ?>
@@ -59,11 +57,11 @@ if ($totalRows > 0) {
 
           <?php for ($i = $page - 5; $i <= $page + 5; $i++):
             if ($i >= 1 and $i <= $totalPages):
-              ?>
+          ?>
               <li class="page-item <?= $i == $page ? 'active' : '' ?>">
                 <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
               </li>
-            <?php endif;
+          <?php endif;
           endfor; ?>
 
           <li class="page-item <?= $page == $totalPages ? 'disabled' : '' ?>">
@@ -123,7 +121,7 @@ if ($totalRows > 0) {
               <td><?= $r['regular_payment_date'] ?></td>
               <td><?= $r['payment_method'] ?></td>
               <td><?= $r['create_datetime'] ?></td>
-              <td><?= $r['bank_reconciliation_status'] ?></td>
+              <td><?= $r['reconciliation_status'] ?></td>
               <td>
                 <?= $r['is_receipt_needed'] == 1 ? '<a href="javascript:void(0);" class="receipt-link" data-receipt_id="' . $r['id'] . '" data-receipt_name="' . htmlentities($r['donor_name']) . '">收據</a>' : '無收據'; ?>
               </td>
@@ -159,12 +157,12 @@ if ($totalRows > 0) {
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     const modal = new bootstrap.Modal(document.getElementById('receiptModal')); // 建立 Modal 實例
 
     // 當點擊"收據"鏈接時
-    document.querySelectorAll('.receipt-link').forEach(function (link) {
-      link.addEventListener('click', function (e) {
+    document.querySelectorAll('.receipt-link').forEach(function(link) {
+      link.addEventListener('click', function(e) {
         e.preventDefault();
         const receiptId = e.target.getAttribute('data-receipt_id'); // 取得捐款ID
 
@@ -196,7 +194,7 @@ if ($totalRows > 0) {
   const deleteOne = e => {
     e.preventDefault(); // 沒有要連到某處
     const tr = e.target.closest('tr');
-    const [, td_id, td_name, , , , , ,] = tr.querySelectorAll('td');
+    const [, td_id, td_name, , , , , , ] = tr.querySelectorAll('td');
     const dn_name = td_name.innerHTML;
     const dn_id = td_id.innerHTML.trim();
     console.log([dn_name.innerHTML]);
