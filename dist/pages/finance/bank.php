@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/parts/init.php';
 $title = "捐款明細";
-$pageName = "list";
+$pageName = "bank";
 
 $perPage = 25; # 每一頁有幾筆
 
@@ -104,7 +104,7 @@ if ($totalRows > 0) {
               <td><?= $r['donor_name'] ?></td>
               <td><?= $r['transfer_amount'] ?></td>
               <td><?= $r['transfer_date'] ?></td>
-              <td><?= $r['id_or_tax_id_number'] ?></td>
+              <td><?= $r['account_last_5'] ?></td>
               <td><?= $r['reconciliation_status'] ?></td>
               <td><a href="edit_bank.php?bn_id=<?= $r['id'] ?>">
                   <i class="fa-solid fa-pen-to-square"></i>

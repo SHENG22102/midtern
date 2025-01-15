@@ -1,0 +1,143 @@
+<!-- 收據明細區 -->
+<script>
+    document.querySelectorAll('[name="is_receipt_needed"]').forEach(el => {
+    el.addEventListener('change', () => {
+      const receiptInfo = document.getElementById('receipt-info');
+      receiptInfo.style.display = el.value === '1' ? 'block' : 'none';
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+  // 頁面載入時初始化狀態
+    const isReceiptNeeded = document.querySelector('[name="is_receipt_needed"]:checked').value;
+    const receiptInfo = document.getElementById('receipt-info');
+    receiptInfo.style.display = isReceiptNeeded === '1' ? 'block' : 'none';
+  });
+
+</script>
+
+<!-- 線上認養 -->
+<script>
+    const donationTypeSelect = document.getElementById('donation_type');
+  const petIdContainer = document.getElementById('pet-id-container');
+  
+  donationTypeSelect.addEventListener('change', () => {
+    if (donationTypeSelect.value === '線上認養') {
+      petIdContainer.style.display = 'block';
+    } else {
+      petIdContainer.style.display = 'none';
+      document.getElementById('pet_id').value = ''; // 清空寵物 ID
+    }
+  });
+  </script>
+
+
+
+
+
+
+
+<div class="form-check">
+    <input class="form-check-input" type="radio" name="is_receipt_needed" value="1" id="status1"
+      <?= $r['is_receipt_needed'] == '1' ? 'checked' : '' ?>>
+    <label class="form-check-label" for="statusConfirmed">
+      已開收據
+    </label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="radio" name="is_receipt_needed" value="0" id="status0"
+      <?= $r['is_receipt_needed'] == '0' ? 'checked' : '' ?>>
+    <label class="form-check-label" for="statusPending">
+      無收據
+    </label>
+  </div>
+
+  <div id="receipt-info" style="display: none;">
+    <div class="mb-3">
+      <label for="receipt_name" class="form-label">收據人姓名</label>
+      <input type="text" class="form-control" id="receipt_name" name="receipt_name"
+        value="<?= $receipt['receipt_name'] ?? '' ?>">
+    </div>
+    <div class="mb-3">
+      <label for="receipt_phone" class="form-label">收據人電話</label>
+      <input type="text" class="form-control" id="receipt_phone" name="receipt_phone"
+        value="<?= $receipt['receipt_phone'] ?? '' ?>" pattern="09\d{8}">
+    </div>
+    <div class="mb-3">
+      <label for="receipt_address" class="form-label">收據地址</label>
+      <textarea class="form-control" id="receipt_address"
+        name="receipt_address"><?= $receipt['receipt_address'] ?? '' ?></textarea>
+    </div>
+  </div>
+
+
+
+  <div class="mb-3" id="pet-id-container" style="display: none;">
+    <label for="pet_id" class="form-label">寵物 ID</label>
+    <input type="number" class="form-control" id="pet_id" name="pet_id" value="<?= $r['pet_id'] ?? '' ?>">
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+// 收據資料新增
+if ($is_receipt_needed == 1) {
+  // 檢查是否已存在對應的收據資料
+  $sql = "SELECT * FROM receipts WHERE donation_id = ?";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$dn_id]);
+
+  if ($stmt->rowCount() > 0) {
+    // 更新收據資料
+    $sql = "UPDATE receipts SET 
+        receipt_name = ?, 
+        receipt_phone = ?, 
+        receipt_address = ? 
+        WHERE donation_id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+      $receipt_name,
+      $receipt_phone,
+      $receipt_address,
+      $dn_id
+    ]);
+  } else {
+    // 新增收據資料
+    $sql = "INSERT INTO receipts 
+        (donation_id, receipt_name, receipt_phone, receipt_address) 
+        VALUES (?, ?, ?, ?)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+      $dn_id,
+      $receipt_name,
+      $receipt_phone,
+      $receipt_address
+    ]);
+  }
+} else {
+  // 刪除對應的收據資料
+  $sql = "DELETE FROM receipts WHERE donation_id = ?";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([$dn_id]);
+}
+
+
+
+//取得收據資料
+$receipt_name = isset($_POST['receipt_name']) ? trim($_POST['receipt_name']) : '';
+$receipt_phone = isset($_POST['receipt_phone']) ? trim($_POST['receipt_phone']) : '';
+$receipt_address = isset($_POST['receipt_address']) ? trim($_POST['receipt_address']) : '';

@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/parts/init.php';
-$title = "捐款明細";
-$pageName = "list";
+$title = "捐款管理";
+$pageName = "donations";
 
 $perPage = 25; # 每一頁有幾筆
 
@@ -27,11 +27,14 @@ if ($totalRows > 0) {
   }
 
   # 取第一頁的資料
-  $sql = sprintf("SELECT * FROM donations LIMIT %d, %d", ($page - 1) * $perPage, $perPage);
+  # 取第一頁的資料，並與 bank_transfer_details 進行聯結查詢
+  $sql = sprintf("SELECT donations.*, bank_transfer_details.reconciliation_status
+  FROM donations
+  LEFT JOIN bank_transfer_details ON donations.id = bank_transfer_details.donation_id 
+  LIMIT %d, %d", ($page - 1) * $perPage, $perPage);
+
   $rows = $pdo->query($sql)->fetchAll(); # 取得該分頁的資料
-}
-
-
+};
 ?>
 <?php include __DIR__ . '/parts/html-head.php' ?>
 <?php include __DIR__ . '/parts/html-navbar.php' ?>
@@ -54,11 +57,11 @@ if ($totalRows > 0) {
 
           <?php for ($i = $page - 5; $i <= $page + 5; $i++):
             if ($i >= 1 and $i <= $totalPages):
-              ?>
+          ?>
               <li class="page-item <?= $i == $page ? 'active' : '' ?>">
                 <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
               </li>
-            <?php endif;
+          <?php endif;
           endfor; ?>
 
           <li class="page-item <?= $page == $totalPages ? 'disabled' : '' ?>">
@@ -84,6 +87,7 @@ if ($totalRows > 0) {
         <thead>
           <tr>
             <th><i class="fa-solid fa-trash"></i></th>
+            <th>捐款編號</th>
             <th>會員編號</th>
             <th>捐款人姓名</th>
             <th>捐款人電話</th>
@@ -107,6 +111,7 @@ if ($totalRows > 0) {
                   <i class="fa-solid fa-trash"></i>
                 </a></td>
               <td style="display:none"><?= $r['id'] ?></td>
+              <td><?= $r['id'] ?></td>
               <td><?= $r['user_id'] ?></td>
               <td><?= $r['donor_name'] ?></td>
               <td><?= $r['donor_phone'] ?></td>
@@ -154,12 +159,12 @@ if ($totalRows > 0) {
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     const modal = new bootstrap.Modal(document.getElementById('receiptModal')); // 建立 Modal 實例
 
     // 當點擊"收據"鏈接時
-    document.querySelectorAll('.receipt-link').forEach(function (link) {
-      link.addEventListener('click', function (e) {
+    document.querySelectorAll('.receipt-link').forEach(function(link) {
+      link.addEventListener('click', function(e) {
         e.preventDefault();
         const receiptId = e.target.getAttribute('data-receipt_id'); // 取得捐款ID
 
@@ -191,7 +196,7 @@ if ($totalRows > 0) {
   const deleteOne = e => {
     e.preventDefault(); // 沒有要連到某處
     const tr = e.target.closest('tr');
-    const [, td_id, td_name, , , , , ,] = tr.querySelectorAll('td');
+    const [, td_id, td_name, , , , , , ] = tr.querySelectorAll('td');
     const dn_name = td_name.innerHTML;
     const dn_id = td_id.innerHTML.trim();
     console.log([dn_name.innerHTML]);
