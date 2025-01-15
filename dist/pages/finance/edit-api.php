@@ -27,7 +27,7 @@ $receipt_phone = isset($_POST['receipt_phone']) ? trim($_POST['receipt_phone']) 
 $receipt_address = isset($_POST['receipt_address']) ? trim($_POST['receipt_address']) : '';
 
 // 資料檢查
-if (empty($dn_id) || empty($donor_name) || empty($donor_phone) || empty($donor_email) || $amount <= 0 || empty($donation_type) || empty($donation_mode) || empty($payment_method) || empty($reconciliation_status)) {
+if (empty($dn_id) || empty($donor_name) || empty($donor_phone) || empty($donor_email) || $amount <= 0 || empty($donation_type) || empty($donation_mode) || empty($payment_method)) {
     $output['code'] = 400;
     $output['error'] = '請填寫所有必要的欄位';
     echo json_encode($output, JSON_UNESCAPED_UNICODE);
@@ -51,7 +51,6 @@ $sql_update_donation = "UPDATE donations SET
     donation_mode = ?, 
     regular_payment_date = ?,
     payment_method = ?, 
-    reconciliation_status = ?, 
     is_receipt_needed = ? 
     WHERE id = ?";
 
@@ -66,7 +65,6 @@ $stmt_update_donation->execute([
     $donation_mode,
     $regular_payment_date,
     $payment_method,
-    $reconciliation_status,
     $is_receipt_needed,
     $dn_id
 ]);

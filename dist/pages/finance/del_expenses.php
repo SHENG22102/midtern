@@ -6,22 +6,22 @@ $dn_id = empty($_GET['id']) ? 0 : intval($_GET['id']);
 
 # 驗證 ID 是否為正整數
 if (empty($dn_id) || !filter_var($dn_id, FILTER_VALIDATE_INT)) {
-    die('無效的捐款 ID');
+    die('無效的 ID');
 }
 
-# 檢查是否存在該捐款 ID
-$sql = "SELECT COUNT(*) FROM donations WHERE id = :id";
+# 檢查是否存在該 ID
+$sql = "SELECT COUNT(*) FROM expenses WHERE id = :id";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([':id' => $dn_id]);
 $count = $stmt->fetchColumn();
 
 if ($count == 0) {
-    die('找不到該捐款紀錄，無法刪除');
+    die('找不到該紀錄，無法刪除');
 }
 
 # 執行刪除操作
 if ($dn_id) {
-  $sql = "DELETE FROM donations WHERE id={$dn_id} ";
+  $sql = "DELETE FROM expenses WHERE id={$dn_id} ";
   $pdo->query($sql);
 }
 
@@ -34,7 +34,7 @@ if ($stmt->rowCount() > 0) {
 
 
 # 設定重導向的頁面
-$come_from = 'donations.php';
+$come_from = 'expenses.php';
 if (isset($_SERVER['HTTP_REFERER'])) {
   $come_from = $_SERVER['HTTP_REFERER'];
 }

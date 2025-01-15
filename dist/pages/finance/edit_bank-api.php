@@ -12,11 +12,11 @@ $bn_id = isset($_POST['bn_id']) ? intval($_POST['bn_id']) : 0;
 $donor_name = isset($_POST['donor_name']) ? trim($_POST['donor_name']) : '';
 $transfer_amount = isset($_POST['transfer_amount']) ? trim($_POST['transfer_amount']) : '';
 $transfer_date = isset($_POST['transfer_date']) ? trim($_POST['transfer_date']) : '';
-$id_or_tax_id_number = isset($_POST['id_or_tax_id_number']) ? trim($_POST['id_or_tax_id_number']) : '';
+$account_last_5 = isset($_POST['account_last_5']) ? trim($_POST['account_last_5']) : '';
 $reconciliation_status = isset($_POST['reconciliation_status']) ? $_POST['reconciliation_status'] : '';
 
 // 資料檢查
-if (empty($donor_name) || empty($transfer_amount) || empty($transfer_date) || empty($id_or_tax_id_number) || empty($reconciliation_status)) {
+if (empty($donor_name) || empty($transfer_amount) || empty($transfer_date) || empty($account_last_5) || empty($reconciliation_status)) {
     $output['code'] = 400;
     $output['error'] = '請填寫所有必要的欄位';
     echo json_encode($output, JSON_UNESCAPED_UNICODE);
@@ -35,7 +35,7 @@ $sql_update_donation = "UPDATE bank_transfer_details SET
     donor_name = ?, 
     transfer_amount = ?, 
     transfer_date = ?, 
-    id_or_tax_id_number = ?, 
+    account_last_5 = ?, 
     reconciliation_status = ?
     WHERE id = ?";
 
@@ -44,7 +44,7 @@ $stmt_update_donation->execute([
     $donor_name,
     $transfer_amount,
     $transfer_date,
-    $id_or_tax_id_number,
+    $account_last_5,
     $reconciliation_status,
     $bn_id
 ]);

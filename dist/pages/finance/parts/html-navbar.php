@@ -34,7 +34,10 @@ if (! isset($pageName)) {
             <a class="nav-link <?= $pageName == 'bank' ? 'active' : '' ?>"
               href="bank.php">對帳列表</a>
           </li>
-
+          <li class="nav-item">
+            <a class="nav-link <?= $pageName == 'expenses' ? 'active' : '' ?>"
+              href="expenses.php">支出列表</a>
+          </li>
         </ul>
       </div>
     </div>
